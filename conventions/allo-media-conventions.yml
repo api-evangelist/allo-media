@@ -1,0 +1,142 @@
+generated: '2026-08-17'
+method: searched
+source: https://docs.allo-media.net/activate-api/rest/
+docs:
+  - https://docs.allo-media.net/activate-api/rest/getting-started/
+  - https://docs.allo-media.net/activate-api/rest/calls/pagination/
+  - https://docs.allo-media.net/activate-api/rest/calls/filters/
+  - https://docs.allo-media.net/activate-api/rest/calls/ordering/
+  - https://docs.allo-media.net/activate-api/rest/calls/exclude-fields/
+  - https://docs.allo-media.net/activate-api/webhook/delivery/
+note: >-
+  Cross-cutting runtime semantics for the Activate REST API and the webhook
+  surface, read from the provider's own documentation. Values are quoted, not
+  inferred. Cross-links: authentication/allo-media-authentication.yml,
+  errors/allo-media-error-codes.yml, rate-limits/allo-media-rate-limits.yml,
+  lifecycle/allo-media-lifecycle.yml, asyncapi/allo-media-events.yml.
+api: Allo-Media Activate API
+base_url: https://activate.uh.live
+authentication:
+  style: OAuth2 client_credentials -> bearer token in Authorization header
+  header: Authorization
+  format: "bearer {access_token}"
+  detail: authentication/allo-media-authentication.yml
+idempotency:
+  supported: false
+  header: null
+  note: >-
+    No idempotency key, no request-replay contract, and no documented retry-safe
+    semantics anywhere in the public documentation. The Activate API is
+    read-only (GET /calls, GET /calls/{unique_id}, GET /calls/{unique_id}/audio),
+    so there are no unsafe writes needing an idempotency key — but the WEBHOOK
+    delivery side does retry ("we will retry the request one time before
+    terminating") with no delivery-id or idempotency field documented on the
+    payload, which leaves duplicate-delivery handling entirely to the consumer.
+    No `Idempotency` pointer is emitted in apis.yml, because there is no
+    idempotency contract to point at.
+pagination:
+  style: limit-offset
+  params:
+    limit:
+      default: 50
+      maximum: 200
+    offset:
+      default: 0
+  response_fields:
+    count: total number of Calls matching the query, at the root of the response
+    data: the list of paginated results
+  end_of_results: "the last page is reached when the `data` list is empty"
+  hard_limit:
+    max_offset: 10000
+    note: "cannot paginate beyond `offset` 10000"
+  example: "?limit=10&offset=10"
+  source: https://docs.allo-media.net/activate-api/rest/calls/pagination/
+filtering:
+  params:
+    - name: timestamp_from
+      meaning: Calls with a `timestamp` >= the given date
+    - name: timestamp_to
+      meaning: Calls with a `timestamp` <= the given date
+    - name: qualified_from
+      meaning: Calls with a `qualified` timestamp >= the given date
+    - name: qualified_to
+      meaning: Calls with a `qualified` timestamp <= the given date
+    - name: status
+      meaning: filter by processing status
+      values: [qualified, void, "qualified,void"]
+  source: https://docs.allo-media.net/activate-api/rest/calls/filters/
+ordering:
+  param: order
+  values: [timestamp, qualified]
+  source: https://docs.allo-media.net/activate-api/rest/calls/ordering/
+sparse_fieldsets:
+  supported: true
+  param: exclude
+  style: comma-separated list of first-level Call fields to omit
+  excludable_examples: [transcript_json, tracking_info, qualification]
+  not_excludable: [unique_id]
+  invalid_value_behaviour: "HTTP 400 Bad Request with details about the error"
+  example: "?exclude=transcript_json,tracking_info,qualification"
+  source: https://docs.allo-media.net/activate-api/rest/calls/exclude-fields/
+  note: >-
+    Exclusion, not inclusion — the API returns everything by default and lets
+    you drop fields. Useful on this API specifically because `transcript_json`
+    is the heavy field.
+field_expansion:
+  supported: false
+  note: No expand/include parameter is documented; related data is inlined.
+metadata:
+  supported: true
+  field: metadata
+  note: >-
+    Customer-supplied custom fields (e.g. ANI, Agent, Direction) ingested via
+    JUpload CSV/JSON/XML metadata files and exposed at the root of the Call
+    object. Since Activate API v1.3.0 (2020-09-03) metadata is exposed at
+    root-level.
+  source: https://docs.allo-media.net/jupload/metadata/
+request_tracing:
+  request_id_header: null
+  note: No request-id / correlation header is documented on responses.
+versioning:
+  scheme: major version with a base-URL change
+  current: 3.0.0
+  current_since: '2024-07-01'
+  detail: >-
+    v3.0.0 moved the API to a new base URL (activate.uh.live) and a new
+    authentication method, deprecating some payload keys. The pre-July-2024
+    version is documented separately against the old base
+    https://api.allo-media.net. There is no version header and no version path
+    segment — the version IS the hostname, which means a client cannot negotiate
+    versions on one host.
+  detail_artifact: lifecycle/allo-media-lifecycle.yml
+error_envelope:
+  format: not RFC 9457
+  content_type: application/json
+  note: >-
+    No `application/problem+json` and no documented error envelope schema. Errors
+    are conveyed by HTTP status code (400/404/429/451 are documented) with
+    free-text detail. JUpload reports its errors out-of-band as daily log files
+    in an `errors/` SFTP sub-directory rather than in a response body.
+  detail: errors/allo-media-error-codes.yml
+rate_limit_signaling:
+  documented_limit: 40 requests per IP per rolling 10 seconds
+  exhaustion_status: 429
+  response_headers: []
+  headers_note: >-
+    No X-RateLimit-*, no RateLimit-*, no Retry-After documented. An agent
+    therefore cannot see how close it is to the limit and can only react to a
+    429 after the fact.
+  detail: rate-limits/allo-media-rate-limits.yml
+webhook_conventions:
+  transport: HTTP POST to a customer-supplied public URL
+  signature_header: X-Uhlive-Signature
+  signature_algorithm: HMAC-SHA256, formatted "sha256=" + hex digest
+  signature_secret: optional passphrase, "strongly recommended"
+  verification_guidance: >-
+    The docs explicitly instruct constant-time comparison rather than `==`, and
+    UTF-8 handling of the payload — unusually good guidance for a webhook of this
+    size.
+  expected_response: 2XX within 10 seconds
+  retries: one retry, then the delivery is terminated
+  detail: asyncapi/allo-media-events.yml
+  source: https://docs.allo-media.net/activate-api/webhook/delivery/

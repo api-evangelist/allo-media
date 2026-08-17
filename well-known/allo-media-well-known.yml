@@ -1,0 +1,175 @@
+generated: '2026-08-17'
+method: probed
+source: live HTTP probe of every host named in apis.yml
+note: >-
+  Probed 2026-08-17. TWO real documents were served and both are saved verbatim:
+  an RFC 9116 security.txt on the marketing host, and a full Keycloak OpenID
+  Connect discovery document on the identity host. Everything else is a genuine
+  404 or a soft-404, and is recorded as a miss.
+  PROBE CONDITIONS, because they shaped this file: the provider's OVH-hosted
+  origins (uh.live, api.uh.live, id.uh.live, activate.uh.live, api.allo-media.net,
+  hermes.allo-media.net) refuse TCP 443 from a single source IP for several
+  minutes after a short burst of requests. Our first pass therefore recorded
+  status 0 on paths that are in fact live; a paced retry recovered them. Any entry
+  below marked `status: 0` means "our connection was refused", NOT "the provider
+  does not serve this" — the distinction is preserved deliberately so a later run
+  does not read a rate-limit as an absence.
+  The docs host, docs.allo-media.net (Cloudflare Pages,
+  am-documentation-public-2.pages.dev), answers HTTP 200 with the documentation
+  homepage — an identical 15,384-byte text/html body — for EVERY unknown path,
+  including all /.well-known/* paths. That is a soft-404 catch-all, not a
+  document, and every such result is scored as a miss.
+hosts:
+- host: https://uh.live
+  documents:
+  - path: /.well-known/security.txt
+    status: 200
+    content_type: text/plain
+    bytes: 174
+    document: true
+    file: allo-media-security.txt
+    note: >-
+      Valid RFC 9116: Contact (two addresses, one per brand domain), Expires
+      2027-05-01, Policy https://uh.live/security-policy, Preferred-Languages
+      en, fr. Feeds security/allo-media-vulnerability-disclosure.yml.
+  - path: /.well-known/agent-card.json
+    status: 404
+    document: false
+  - path: /.well-known/agent.json
+    status: 404
+    document: false
+  - path: /.well-known/openid-configuration
+    status: 404
+    document: false
+    note: >-
+      Correctly absent — this is the marketing host. The real discovery document
+      is on id.uh.live under the Keycloak realm path (below).
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+    document: false
+  - path: /.well-known/api-catalog
+    status: 404
+    document: false
+  - path: /.well-known/ai-plugin.json
+    status: 404
+    document: false
+- host: https://id.uh.live
+  note: Keycloak identity provider, realm `uhlive`.
+  documents:
+  - path: /realms/uhlive/.well-known/openid-configuration
+    status: 200
+    content_type: application/json
+    bytes: 6625
+    document: true
+    file: allo-media-openid-configuration.json
+    note: >-
+      Full OIDC discovery document for the realm the provider's docs name as the
+      token endpoint. This is the only machine-readable contract of any kind that
+      Allo-Media serves publicly — there is no OpenAPI, no AsyncAPI and no MCP
+      manifest — so it is the highest-value artifact recovered in this pass. Feeds
+      authentication/allo-media-authentication.yml and
+      conformance/allo-media-conformance.yml.
+  - path: /.well-known/openid-configuration
+    status: 404
+    document: false
+    note: >-
+      Root path 404s; discovery lives under the realm path, which is standard
+      Keycloak behaviour.
+- host: https://docs.allo-media.net
+  note: >-
+    Cloudflare Pages. Soft-404 catch-all — every path below returned the docs
+    homepage with an identical 15,384-byte text/html body. All are misses, and no
+    WellKnown credit is taken from any of them.
+  documents:
+  - path: /.well-known/security.txt
+    status: 200
+    content_type: text/html
+    bytes: 15384
+    document: false
+    note: soft-404 — docs homepage, not a security.txt
+  - path: /.well-known/openid-configuration
+    status: 200
+    content_type: text/html
+    document: false
+    note: soft-404 — docs homepage
+  - path: /.well-known/oauth-authorization-server
+    status: 200
+    content_type: text/html
+    document: false
+    note: soft-404 — docs homepage
+  - path: /.well-known/api-catalog
+    status: 200
+    content_type: text/html
+    document: false
+    note: soft-404 — docs homepage
+  - path: /.well-known/ai-plugin.json
+    status: 200
+    content_type: text/html
+    document: false
+    note: soft-404 — docs homepage
+  - path: /.well-known/agent-card.json
+    status: 200
+    content_type: text/html
+    document: false
+    note: soft-404 — docs homepage
+  - path: /.well-known/agent.json
+    status: 200
+    content_type: text/html
+    document: false
+    note: soft-404 — docs homepage
+- host: https://api.uh.live
+  note: WebSocket Stream API host.
+  documents:
+  - path: /.well-known/agent-card.json
+    status: 404
+    document: false
+  - path: /.well-known/agent.json
+    status: 404
+    document: false
+- host: https://activate.uh.live
+  note: Activate REST API host (v3.0.0).
+  documents:
+  - path: /.well-known/agent-card.json
+    status: 404
+    document: false
+  - path: /.well-known/agent.json
+    status: 0
+    document: false
+    note: connection refused on retry (rate limit), not an observed absence
+- host: https://status.uh.live
+  documents:
+  - path: /.well-known/security.txt
+    status: 404
+    document: false
+  - path: /.well-known/openid-configuration
+    status: 404
+    document: false
+  - path: /.well-known/agent-card.json
+    status: 404
+    document: false
+  - path: /.well-known/agent.json
+    status: 404
+    document: false
+- host: https://www.allo-media.net
+  note: >-
+    Legacy apex/www. 301s to https://uh.live/en/ — the rebrand. No /.well-known/
+    surface of its own.
+  documents:
+  - path: /.well-known/security.txt
+    status: 301
+    document: false
+    note: redirects to the uh.live host, whose security.txt is the real one
+summary:
+  hosts_probed: 7
+  documents_served: 2
+  security_txt: true
+  openid_configuration: true
+  oauth_authorization_server: false
+  api_catalog: false
+  ai_plugin: false
+  agent_card: false
+  agent_card_note: >-
+    Probed on all four candidate hosts at both the canonical
+    /.well-known/agent-card.json and the legacy /.well-known/agent.json path.
+    Every reachable result was a hard 404, so NO a2a/ artifact was written — no
+    stub, no candidate, nothing. There is no agent card to record.

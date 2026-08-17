@@ -1,0 +1,153 @@
+generated: '2026-08-17'
+method: searched
+source: https://docs.allo-media.net/activate-api/webhook/delivery/
+spec_type: none
+spec_type_note: >-
+  The provider publishes NO AsyncAPI document. We probed for one and found
+  nothing, and we did not author one — an AsyncAPI here would be our invention,
+  not the provider's contract. What the provider DOES publish is two real event
+  surfaces documented in prose: an outbound HTTP webhook, and a bidirectional
+  WebSocket streaming protocol with named events. Both are catalogued below from
+  the provider's own documentation, which is what justifies the `Webhooks`
+  pointer in apis.yml (and nothing more).
+docs:
+  - https://docs.allo-media.net/activate-api/webhook/getting-started/
+  - https://docs.allo-media.net/activate-api/webhook/delivery/
+  - https://docs.allo-media.net/stream-h2h/protocol/
+surfaces:
+  - id: activate-webhook
+    kind: webhook
+    protocol: HTTP POST
+    direction: provider -> customer
+    endpoint: customer-supplied public URL
+    subscription:
+      self_service: false
+      how: >-
+        "contact your account manager at Allo-Media" — webhook subscriptions are
+        provisioned by the provider, not by the customer through an API or
+        dashboard.
+      required_inputs:
+        - the name of the campaign (one or several) to be notified about
+        - the public URL endpoint that receives the payloads
+        - an optional secret passphrase
+    events:
+      - name: call.processed
+        name_note: >-
+          NOT a provider-published event name. The provider documents exactly one
+          trigger — "an event that occur when a call has been processed on our
+          platform" — and publishes NO event-type identifier or `type`/`event`
+          discriminator field on the payload. `call.processed` is our label for
+          the single documented trigger, marked here so it is never mistaken for
+          the provider's own vocabulary.
+        published_name: null
+        trigger: a call has been processed on the platform (transcription, redaction, analysis and tagging complete)
+        method: POST
+        payload_fields:
+          - name: unique_id
+            meaning: call identifier
+          - name: timestamp
+            meaning: delivery timestamp
+          - name: transcript_json
+            meaning: transcription data with call content and metadata
+          - name: status
+            meaning: call status (qualified / void)
+          - name: metadata
+            meaning: customer custom fields (e.g. ANI, Agent, Direction)
+          - name: tags
+            meaning: analytics tags with confidence scores
+          - name: in
+            meaning: inbound call direction information
+          - name: out
+            meaning: outbound call direction information
+          - name: audio_state
+            meaning: audio availability status
+    security:
+      signature_header: X-Uhlive-Signature
+      algorithm: HMAC-SHA256
+      format: 'sha256= followed by the hex digest of the payload, keyed with the webhook secret'
+      secret: optional, "strongly recommended"
+      guidance: >-
+        The docs explicitly require constant-time comparison rather than `==`,
+        and UTF-8 payload handling. That is better verification guidance than
+        most webhook surfaces of this size publish.
+    delivery:
+      expected_response: 2XX
+      timeout_seconds: 10
+      retries: 1
+      after_retries: delivery terminated
+      idempotency_field: null
+      idempotency_note: >-
+        There is a retry but no delivery id and no idempotency field on the
+        payload, so a consumer cannot distinguish a retry from a second real
+        event except by `unique_id` + `timestamp`. De-duplication is entirely the
+        consumer's problem.
+      ordering_guarantee: null
+      replay_api: false
+    source: https://docs.allo-media.net/activate-api/webhook/delivery/
+  - id: stream-h2h-websocket
+    kind: streaming
+    protocol: WebSocket (Phoenix Channels, vsn=2.0.0)
+    endpoint: wss://api.uh.live/socket/websocket
+    endpoint_template: "wss://api.uh.live/socket/websocket?vsn=2.0.0&jwt=YOUR_ACCESS_TOKEN"
+    protocol_version: V2
+    deprecated_versions: [V1]
+    auth: OAuth2 client_credentials token passed as the `jwt` query parameter (5 minute TTL)
+    bandwidth_limit: 20 kB/second/connection
+    client_messages:
+      - name: phx_join
+        meaning: join a conversation
+      - name: phx_leave
+        meaning: leave a conversation
+      - name: audio_chunk
+        meaning: binary audio data sent to the recognizer
+    server_events:
+      - name: phx_reply
+        meaning: response to a join/leave request
+      - name: audio_words_decoded
+        meaning: interim (partial) transcription results
+      - name: audio_segment_decoded
+        meaning: final segment transcript
+      - name: speaker_joined
+        meaning: a participant joined the conversation
+      - name: speaker_left
+        meaning: a participant left the conversation
+    additional_event_families:
+      - name: named entities
+        docs: https://docs.allo-media.net/stream-h2h/protocol/named-entities/
+      - name: analytics
+        docs: https://docs.allo-media.net/stream-h2h/protocol/analytics/
+    sdk_typed_events:
+      note: >-
+        The JavaScript SDK publishes its event names as TypeScript enums, which
+        is the closest thing to a machine-readable event catalogue this provider
+        ships.
+        Enums: DecodingEvent, EntityEvent, EntitiesRelationEvent. Payload
+        interfaces: WordsDecoded, SegmentDecoded, SegmentDecodedWord,
+        SegmentNormalized, SpeakerJoined, SpeakerLeft, Entity, EntityAnnotation,
+        EntityAnnotationQuantity, EntityRef, EntityRelation, Tag, TagAnnotation,
+        TagsFound.
+      docs: https://docs.allo-media.net/stream-h2h/javascript/api-reference/
+    source: https://docs.allo-media.net/stream-h2h/protocol/
+  - id: stream-h2b
+    kind: streaming
+    protocol: MRCP and WebSocket
+    purpose: real-time speech recognition for voicebots (human-to-bot)
+    docs: https://docs.allo-media.net/stream-h2b/
+    note: >-
+      A second streaming surface with grammar-based input (regex grammars) and its
+      own protocol/authentication docs. Event names not captured in this pass.
+summary:
+  asyncapi_published: false
+  webhook_surface: true
+  streaming_surface: true
+  webhook_event_types_published: 0
+  webhook_triggers_documented: 1
+  streaming_events_documented: 5
+x-gaps:
+  - No AsyncAPI document, so none of the event surfaces are machine-readable.
+  - No event-type identifier on the webhook payload — a single implicit trigger
+    means the surface cannot grow without breaking consumers who pattern-match on
+    shape.
+  - Webhook subscription is human-provisioned via an account manager; there is no
+    subscription API, no endpoint rotation, and no secret rotation documented.
+  - No delivery id, no replay/redelivery API, no ordering guarantee.

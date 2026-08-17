@@ -1,0 +1,81 @@
+generated: '2026-08-17'
+method: searched
+source: https://github.com/orgs/uhlive/repositories
+note: >-
+  Allo-Media now trades as uh!ive and publishes its client libraries under the
+  GitHub org `uhlive` (github.com/uhlive), whose profile links back to
+  https://www.uh.live. The Allo-Media GitHub org (github.com/allo-media,
+  "Groupe Allo-Media") also lists https://uh.live as its website, which is the
+  provider's own confirmation that the uh.live / uhlive surface belongs to this
+  company. Versions and publish dates below were read from the registry
+  metadata endpoints (registry.npmjs.org, pypi.org/pypi/<pkg>/json) on
+  2026-08-17.
+packages:
+  - language: python
+    registry: pypi
+    name: uhlive
+    url: https://pypi.org/project/uhlive/
+    install: pip install -U uhlive[examples]
+    repository: https://github.com/uhlive/python-sdk
+    docs: https://docs.allo-media.net/stream-h2h/python/
+    official: true
+    version: 2.1.0
+    published: '2026-06-11'
+    summary: Uhlive Python SDK
+    note: >-
+      Official Python SDK for the Stream API (human-to-human real-time
+      transcription over WebSocket) and the voicebot Stream API. Install command
+      quoted verbatim from
+      https://docs.allo-media.net/stream-h2h/python/getting-started/.
+  - language: javascript
+    registry: npm
+    name: "@uhlive/javascript-sdk"
+    url: https://www.npmjs.com/package/@uhlive/javascript-sdk
+    install: npm install @uhlive/javascript-sdk
+    repository: https://github.com/uhlive/javascript-sdk
+    docs: https://docs.allo-media.net/stream-h2h/javascript/
+    official: true
+    version: 0.20.0
+    published: '2025-09-24'
+    summary: JavaScript SDK for convenient access to the uh!ive API
+    note: >-
+      Official browser/TypeScript SDK for the Stream API. Last publish
+      2025-09-24 — roughly nine months behind the Python SDK (2.1.0,
+      2026-06-11), so the two first-party SDKs are not on the same release
+      cadence.
+  - language: javascript
+    registry: cdn
+    name: amloader.js (Hermes)
+    url: https://hermes.allo-media.net/static/js/amloader.js
+    install: "<script src='https://hermes.allo-media.net/static/js/amloader.js'></script>"
+    docs: https://docs.allo-media.net/hermes/getting-started/
+    official: true
+    version: null
+    published: null
+    note: >-
+      Hermes is the first-party phone-call-tracking JavaScript, distributed only
+      as an unpinned script tag from the provider's own CDN host — there is no
+      npm/registry entry and no version in the URL, so a consumer cannot tell
+      which build they are loading and neither can we. Recorded as
+      `version: null` deliberately (checked, nothing to record) rather than
+      omitted. Loader URL quoted verbatim from the Hermes getting-started page;
+      the host itself refused our probe on 2026-08-17 (see x-probe below).
+x-probe:
+  date: '2026-08-17'
+  note: >-
+    hermes.allo-media.net could not be reached from our egress on 2026-08-17
+    (TCP 443 connection refused, curl exit 7) — the same block that hit every
+    other OVH-hosted uh.live/allo-media.net origin during this pass. The loader
+    URL is recorded as the provider documents it, not as an observed 200.
+  results:
+    - url: https://hermes.allo-media.net/static/js/amloader.js
+      status: 0
+      detail: connection refused (not a 404 — origin unreachable from our IP)
+x-not-found:
+  note: >-
+    No first-party Allo-Media/uh!ive package found on Maven Central, NuGet,
+    pkg.go.dev, RubyGems, Packagist or crates.io. The `allo-media` GitHub org
+    does publish Rust crates (text2num, text2num-rs) and Elixir/Python tooling
+    (eventail, falguard, elasticsearch-elixir), but these are internal/NLP
+    utilities, not clients for the Allo-Media APIs, so they are not listed as
+    SDKs here.

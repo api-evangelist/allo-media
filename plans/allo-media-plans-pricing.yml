@@ -1,0 +1,47 @@
+generated: '2026-08-17'
+method: searched
+source: https://uh.live/en/
+plan_count: 0
+pricing_url: null
+pricing_published: false
+note: >-
+  Allo-Media / uh!ive publishes NO plans, NO tiers and NO prices. The commercial
+  route is a demo request (https://uh.live/en/get-a-demo/) and, throughout the
+  developer documentation, an account manager: API credentials, webhook
+  subscriptions, JUpload SFTP accounts and the GPG public key are all obtained by
+  contacting "your account manager at Allo-Media". There is no self-service
+  signup, no free tier, no trial, and no published unit price for transcription
+  minutes or call volume. This is an honest zero — enterprise, sales-led,
+  contact-us pricing — not a gap in our search.
+  The provider is aware of this: "Enhancing API self-service onboarding
+  capabilities" appears on their own public roadmap under "Later"
+  (https://docs.allo-media.net/products-description/roadmap/, last updated
+  2026-01-16).
+plans: []
+commercial_model:
+  type: enterprise-sales
+  self_service_signup: false
+  free_tier: false
+  trial: false
+  demo_request: https://uh.live/en/get-a-demo/
+  credential_issuance: account manager
+  contact: https://uh.live/en/contact/
+evidence:
+  - url: https://uh.live/en/
+    status: 200
+    finding: >-
+      Product site navigation offers "Get a demo" and "Contact" with no pricing
+      link and no plans page.
+    checked: '2026-08-17'
+  - url: https://docs.allo-media.net/activate-api/rest/getting-started/
+    status: 200
+    finding: >-
+      "You need to be a customer of Allo-Media to use their APIs... contact your
+      account manager to get API credentials."
+    checked: '2026-08-17'
+x-caveat: >-
+  We could not re-probe uh.live for a pricing page later in the pass: after our
+  first requests the provider's OVH-hosted origins began refusing TCP 443 from
+  our egress (status 0) and did not recover. The finding above is based on the
+  successful read of the product homepage earlier the same day. If uh.live has
+  since published a pricing page, this artifact should be re-run.

@@ -1,0 +1,102 @@
+generated: '2026-08-17'
+method: searched
+source: https://docs.allo-media.net/hermes/getting-started/
+note: >-
+  Client-side / embeddable surfaces, distinct from the server-side SDKs in
+  packages/. Allo-Media ships one real browser component (Hermes, the call
+  tracking script) plus a browser-capable streaming SDK and a hosted search UI.
+families:
+  - id: hermes
+    name: Hermes
+    kind: browser script (dynamic number insertion / call tracking)
+    docs: https://docs.allo-media.net/hermes/
+    loader: "<script src='https://hermes.allo-media.net/static/js/amloader.js'></script>"
+    loader_pinned: false
+    loader_note: >-
+      The loader URL carries no version and no integrity hash, so every page
+      embedding Hermes silently takes whatever build the CDN currently serves.
+      Recorded in packages/ as `version: null` for the same reason.
+    global_object: am
+    global_object_note: default global, customisable if it collides
+    purpose: >-
+      Replaces phone numbers in the DOM with tracked numbers so a phone call can
+      be attributed back to a web session — the "Vocal Cookie" lead-attribution
+      product.
+    configuration:
+      method: create
+      options:
+        - name: cohortMode
+          type: boolean
+          meaning: enables tracking without cookies
+        - name: cookieVisitorExpires
+          type: int
+          meaning: cookie retention in seconds; default 1 year
+        - name: fallbackToCookies
+          type: boolean
+          meaning: use cookies when localStorage is unavailable
+        - name: ignoreAttributes
+          type: array
+          meaning: HTML attributes to leave untouched
+        - name: ignoreSelectors
+          type: array
+          meaning: DOM selectors to exclude from processing
+        - name: localStorage
+          type: boolean
+          meaning: use localStorage instead of cookies
+        - name: multiPages
+          type: boolean
+          meaning: keep the same tracked number across pages
+        - name: replaceSelectors
+          type: array
+          meaning: restrict replacement to selected DOM elements
+      additional:
+        method: set
+        meaning: callbacks, error handling, and supplementary tracking data
+    privacy_controls:
+      cookieless_mode: true
+      cookieless_option: cohortMode
+      note: >-
+        A documented cookieless mode and a localStorage alternative — real
+        consent-relevant controls, which matters for a French/EU vendor whose
+        product places a tracking identifier in the visitor's browser.
+    known_issues_page: https://docs.allo-media.net/hermes/known-problems/
+    cookie_docs: https://docs.allo-media.net/hermes/cookie-management/
+  - id: uhlive-javascript-sdk
+    name: "@uhlive/javascript-sdk"
+    kind: browser/TypeScript client for the real-time Stream API
+    docs: https://docs.allo-media.net/stream-h2h/javascript/
+    registry: npm
+    package: "@uhlive/javascript-sdk"
+    version: 0.20.0
+    published: '2025-09-24'
+    api_reference: https://docs.allo-media.net/stream-h2h/javascript/api-reference/
+    note: >-
+      Listed here as well as in packages/ because it is designed to run in the
+      browser (it opens the WebSocket directly and receives decoded transcript
+      events client-side), which makes it an embeddable front-end surface, not
+      just a server SDK. Exposes classes Uhlive and Conversation.
+    ui_widgets: false
+    ui_widgets_note: >-
+      It is a data/transport library, not a UI kit — no prebuilt transcript
+      widget, player, or element library is published.
+  - id: scribr
+    name: Scribr
+    kind: hosted search interface over calls and transcripts
+    docs: https://docs.allo-media.net/scribr/
+    search_syntax_docs: https://docs.allo-media.net/scribr/fr/search-syntax/
+    embeddable: unknown
+    note: >-
+      A provider-hosted product UI with its own documented search syntax, not a
+      component a customer embeds in their own page as far as the docs state.
+      Recorded because it is the human surface a developer will be asked about
+      alongside the API.
+summary:
+  component_count: 3
+  embeddable_browser_components: 2
+  ui_kit_published: false
+  unpinned_distributions: 1
+x-gaps:
+  - Hermes is distributed unpinned with no SRI hash — a supply-chain and
+    reproducibility gap for every site embedding it.
+  - No UI component library, no prebuilt transcript/player widget, no embedded
+    dashboard offered for the analytics products.

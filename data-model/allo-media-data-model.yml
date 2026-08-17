@@ -1,0 +1,179 @@
+generated: '2026-08-17'
+method: searched
+source: https://docs.allo-media.net/activate-api/rest/call/
+docs:
+  - https://docs.allo-media.net/activate-api/rest/call/
+  - https://docs.allo-media.net/activate-api/rest/calls/
+  - https://docs.allo-media.net/activate-api/webhook/delivery/
+  - https://docs.allo-media.net/stream-h2h/javascript/api-reference/interfaces/
+note: >-
+  Read from the provider's documented object reference and the JavaScript SDK's
+  published TypeScript interfaces — NOT derived from an OpenAPI, because no
+  machine-readable spec was reachable in this pass. Fields are only listed where
+  the provider names them. The Call object's full field list is not published in
+  one place, so this graph is deliberately incomplete rather than filled in by
+  inference; `documented: partial` marks that.
+completeness: partial
+entities:
+  - name: Call
+    id_field: unique_id
+    id_prefix: null
+    primary: true
+    documented: partial
+    endpoints:
+      - GET /calls
+      - GET /calls/{unique_id}
+      - GET /calls/{unique_id}/audio
+    lifecycle: >-
+      A Call becomes retrievable only once processing completes — transcription,
+      redaction, analysis and tagging. Calls in flight are not exposed at all
+      (they are not 202/pending, they are simply absent), which is why the
+      webhook exists.
+    states:
+      - qualified
+      - void
+    fields:
+      - name: unique_id
+        type: string
+        meaning: call identifier; the only field that cannot be excluded
+      - name: timestamp
+        type: datetime
+        meaning: date of the call; filterable via timestamp_from/timestamp_to, orderable
+      - name: qualified
+        type: datetime
+        meaning: end-of-processing datetime; filterable via qualified_from/qualified_to, orderable
+      - name: status
+        type: enum
+        values: [qualified, void]
+      - name: transcript_json
+        type: object
+        meaning: the transcription, with per-segment content and metadata
+        excludable: true
+        note: the heavy field; segment-level `score` added in v1.3.0
+      - name: tracking_info
+        type: object
+        excludable: true
+      - name: qualification
+        type: object
+        excludable: true
+      - name: metadata
+        type: object
+        meaning: customer-supplied custom fields ingested via JUpload (e.g. ANI, Agent, Direction); exposed at root level since v1.3.0
+      - name: tags
+        type: array
+        meaning: analytics tags with confidence scores
+      - name: in
+        type: object
+        meaning: inbound direction information
+      - name: out
+        type: object
+        meaning: outbound direction information
+      - name: audio_state
+        type: enum
+        values: [available, missing]
+        meaning: whether the call audio still exists under the retention policy
+      - name: ivr_end
+        type: field
+        meaning: exposed at root level since v1.2.0
+  - name: CallAudio
+    documented: partial
+    endpoints:
+      - GET /calls/{unique_id}/audio
+    note: >-
+      Not an independent resource — a sub-resource of Call, gated by
+      `Call.audio_state`. Returns HTTP 451 once retention has expired.
+  - name: Campaign
+    documented: minimal
+    note: >-
+      Named only as the unit a webhook subscription is scoped to ("the name of the
+      campaign (one or several)"). No endpoint, no fields, and no API to list or
+      manage campaigns is published, so it exists in the data model but not in
+      the API surface.
+  - name: Transcript
+    documented: partial
+    parent: Call
+    via: transcript_json
+    fields:
+      - name: segments
+        note: each segment carries content, metadata and a confidence `score`
+  - name: Tag
+    documented: partial
+    source_surface: speech analytics
+    fields:
+      - name: confidence
+        type: number
+    docs: https://docs.allo-media.net/speech-analytics/french/tags/
+  - name: Entity
+    documented: partial
+    source_surface: named entity recognition (NER)
+    docs: https://docs.allo-media.net/speech-analytics/ner/
+    note: >-
+      The website states 25 recognised entity types with redaction support. The
+      JavaScript SDK publishes Entity, EntityAnnotation,
+      EntityAnnotationQuantity, EntityRef and EntityRelation interfaces, plus
+      EntityEvent and EntitiesRelationEvent enums, so entities and the relations
+      between them are first-class in the streaming surface.
+  - name: Conversation
+    documented: partial
+    source_surface: Stream API (WebSocket)
+    note: >-
+      The streaming counterpart of Call. A client joins a Conversation
+      (`phx_join`), streams `audio_chunk`s, and receives decoded words/segments
+      plus speaker join/leave events. The SDK exposes it as the `Conversation`
+      class.
+    docs: https://docs.allo-media.net/stream-h2h/javascript/api-reference/classes/conversation/
+  - name: Speaker
+    documented: minimal
+    parent: Conversation
+    note: SpeakerJoined / SpeakerLeft interfaces in the JS SDK.
+relationships:
+  - from: Call
+    to: Transcript
+    kind: has_one
+    via: transcript_json
+  - from: Call
+    to: CallAudio
+    kind: has_one
+    via: audio_state
+    note: presence is conditional on the retention window
+  - from: Call
+    to: Tag
+    kind: has_many
+    via: tags
+  - from: Call
+    to: Metadata
+    kind: has_one
+    via: metadata
+    note: customer-defined shape, ingested via JUpload
+  - from: Campaign
+    to: Call
+    kind: has_many
+    via: campaign name (webhook subscription scope)
+    confidence: medium
+    note: >-
+      Inferred from the webhook subscription model, which is campaign-scoped. No
+      campaign field is documented on the Call object itself.
+  - from: Transcript
+    to: Entity
+    kind: has_many
+    via: named entity recognition annotations
+  - from: Entity
+    to: Entity
+    kind: has_many
+    via: EntityRelation
+    note: the SDK models relations between entities, not just entities
+  - from: Conversation
+    to: Speaker
+    kind: has_many
+    via: speaker_joined / speaker_left events
+  - from: Conversation
+    to: Transcript
+    kind: has_many
+    via: audio_segment_decoded events
+x-gaps:
+  - No published complete field list for the Call object, and no schema of any
+    kind for transcript_json — the single most important payload on the platform.
+  - Campaign is referenced but has no API surface.
+  - No id-prefix convention (identifiers are opaque `unique_id` values).
+  - The batch (Call) and streaming (Conversation) models describe the same
+    domain with different vocabularies and no published mapping between them.

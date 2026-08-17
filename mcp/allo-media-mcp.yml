@@ -1,0 +1,71 @@
+generated: '2026-08-17'
+method: derived
+status: candidate
+source: https://docs.allo-media.net/activate-api/rest/
+note: >-
+  Allo-Media / uh!ive ships NO MCP server. We searched the provider's
+  documentation, its two GitHub organisations (allo-media, uhlive), npm under
+  `@uhlive/*`, and probed for a hosted endpoint — nothing. The tool list below is
+  a CANDIDATE we derived from the three REST operations the provider documents,
+  so the shape is recorded for a future conversation with them; it is not
+  something an agent can call today.
+  NO `MCPServer` pointer is emitted in apis.yml. The pointer asserts that the
+  provider operates an MCP server, and they do not. Wiring one for a candidate
+  would score 4 ergonomics points and 12 agent-readiness points for a surface
+  that does not exist.
+deployment:
+  mode: none
+  endpoint: null
+  install: null
+  package: null
+  auth: none
+  verified: searched
+  note: >-
+    `mode: none` — nobody ships a server, remote or stdio. No endpoint URL is
+    guessed here; a guessed MCP path that happened to answer 200 would read as a
+    verified agent surface and is the worst artifact this pipeline could produce.
+server:
+  name: null
+  transport: null
+  url: null
+tools:
+  - name: list_calls
+    description: >-
+      List processed calls, with limit/offset paging, timestamp/qualification
+      date filters, status filter and field exclusion.
+    source_operation: "GET /calls"
+    source_docs: https://docs.allo-media.net/activate-api/rest/calls/
+    status: candidate
+    input_schema_source: >-
+      Documented query parameters: limit, offset, timestamp_from, timestamp_to,
+      qualified_from, qualified_to, status, order, exclude. No OpenAPI exists, so
+      types/formats are as described in prose, not as a validated schema.
+  - name: get_call
+    description: Retrieve the full detail of one processed call by its unique_id.
+    source_operation: "GET /calls/{unique_id}"
+    source_docs: https://docs.allo-media.net/activate-api/rest/call/
+    status: candidate
+  - name: get_call_audio
+    description: >-
+      Download the audio recording of a call; returns HTTP 451 once the GDPR
+      retention window has expired.
+    source_operation: "GET /calls/{unique_id}/audio"
+    source_docs: https://docs.allo-media.net/activate-api/rest/call/
+    status: candidate
+x-search:
+  date: '2026-08-17'
+  looked_at:
+    - https://docs.allo-media.net/ (full sitemap, 1 index + ~140 pages — no MCP page)
+    - https://github.com/orgs/uhlive/repositories (2 repos: python-sdk, javascript-sdk)
+    - https://github.com/orgs/allo-media/repositories (33 repos, no MCP server)
+    - npm registry for @uhlive/* and uhlive
+  found: none
+x-feasibility-note: >-
+  This provider is an unusually good MCP candidate and a poor one at the same
+  time. Good: the read surface is tiny (three operations) and the value is high
+  (an agent asking "what did customers complain about in yesterday's calls" is
+  exactly this product). Poor: there is no self-service credential, tokens live
+  60 minutes, the data is recorded phone conversations under GDPR with a
+  destructive retention policy, and `transcript_json` has no published schema —
+  so any MCP server would need the provider's own scoping decisions about
+  redaction and consent before it should exist.

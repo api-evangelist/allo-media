@@ -1,0 +1,81 @@
+generated: '2026-08-17'
+method: searched
+source: https://docs.allo-media.net/activate-api/rest/getting-started/
+docs:
+  - https://docs.allo-media.net/activate-api/rest/getting-started/
+  - https://docs.allo-media.net/activate-api/rest/calls/pagination/
+  - https://docs.allo-media.net/stream-h2h/
+limit_count: 4
+note: >-
+  Read from the provider's published documentation, not observed on a live
+  response — no self-service credential exists to call the API with, and the API
+  origin refused our anonymous probes during this pass. Every figure below is
+  quoted from the docs page cited on the entry.
+rate_limits:
+  - id: activate-rest-per-ip
+    scope: per-ip
+    surface: Activate API (REST) — https://activate.uh.live
+    limit: 40
+    window: 10s
+    window_style: rolling ("during the last 10 seconds")
+    burst: null
+    exhaustion_status: 429
+    quote: >-
+      "The API usage is limited to 40 requests per IP during the last 10
+      seconds. If you reach this limit, you will receive an HTTP 429 Too Many
+      Requests status code."
+    source: https://docs.allo-media.net/activate-api/rest/getting-started/
+    note: >-
+      Scoped per SOURCE IP, not per API key or per account. That matters: several
+      tenants behind one NAT/egress share the budget, and a single noisy job can
+      throttle an unrelated integration on the same host.
+  - id: activate-rest-page-size
+    scope: per-request
+    surface: Activate API (REST)
+    limit: 200
+    unit: records per page
+    default: 50
+    parameter: limit
+    source: https://docs.allo-media.net/activate-api/rest/calls/pagination/
+  - id: activate-rest-offset-ceiling
+    scope: per-query
+    surface: Activate API (REST)
+    limit: 10000
+    unit: maximum offset
+    parameter: offset
+    exhaustion_behaviour: cannot paginate beyond offset 10000
+    source: https://docs.allo-media.net/activate-api/rest/calls/pagination/
+    note: >-
+      A hard result-set ceiling, not a throughput limit: combined with the 200
+      max page size, no single filtered query can walk more than 10,000 calls.
+      Large backfills must be sliced with `timestamp_from`/`timestamp_to`.
+  - id: stream-websocket-bandwidth
+    scope: per-connection
+    surface: Stream API for humans (WebSocket) — wss://api.uh.live
+    limit: 20
+    unit: kB/second
+    quote: "There is a bandwidth limit of 20kB / second / WebSocket connection."
+    exhaustion_status: null
+    source: https://docs.allo-media.net/stream-h2h/
+    note: >-
+      The first-party Python and JavaScript SDKs "handle websocket bandwidth
+      management transparently" per the docs, so this limit is mostly invisible
+      to SDK users and mostly a trap for anyone implementing the protocol
+      directly.
+response_headers:
+  documented: []
+  retry_after: false
+  x_ratelimit: false
+  ratelimit_standard: false
+  note: >-
+    NO rate-limit response headers are documented anywhere — no `X-RateLimit-*`,
+    no RFC 9331/draft `RateLimit-*`, and no `Retry-After` on the 429. This is the
+    material gap for automated consumers: a client cannot see its remaining
+    budget or a server-suggested back-off, only the 429 after it has already
+    been throttled. The number in the docs is not a runtime signal.
+x-gaps:
+  - No per-key or per-account quota published; only the per-IP throughput limit.
+  - No monthly/volume quota published for transcription minutes or call volume
+    (those are commercial terms handled by an account manager — see
+    plans/allo-media-plans-pricing.yml).
+  - No rate limits documented for the webhook delivery direction.

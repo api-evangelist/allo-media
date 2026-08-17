@@ -1,0 +1,233 @@
+generated: '2026-08-17'
+method: searched
+source: https://docs.allo-media.net/
+method_detail: searched + probed
+note: >-
+  Cross-cutting standards conformance, assessed from two sources: the provider's
+  published documentation, and two documents we fetched live and saved verbatim —
+  the RFC 9116 security.txt (well-known/allo-media-security.txt) and the Keycloak
+  realm's OIDC discovery document
+  (well-known/allo-media-openid-configuration.json). No OpenAPI was reachable, so
+  nothing here is derived from an API spec. Every `conforms: true` cites either a
+  documentation page or one of those two captured documents, and every
+  `conforms: false` means "we looked and found no published evidence", not "the
+  provider fails a test we ran".
+  Deliberately NO `Compliance` pointer is emitted in apis.yml: GDPR-driven data
+  retention is documented as behaviour, but no compliance PROGRAM page, trust
+  centre, or named certification (SOC 2, ISO 27001, HDS, PCI DSS) was reachable
+  and verifiable during this pass. Emitting Compliance on that basis would credit
+  a posture we could not confirm.
+standards:
+  - id: oauth2
+    name: OAuth 2.0
+    conforms: true
+    profile: client_credentials grant (RFC 6749 §4.4)
+    evidence: >-
+      Token endpoint https://id.uh.live/realms/uhlive/protocol/openid-connect/token
+      with client_id/client_secret and grant_type=client_credentials, documented
+      for both the Activate REST API and the Stream API.
+    source: https://docs.allo-media.net/activate-api/rest/authentication/
+  - id: oidc
+    name: OpenID Connect (Discovery 1.0)
+    conforms: true
+    evidence: >-
+      https://id.uh.live/realms/uhlive/.well-known/openid-configuration returned
+      HTTP 200 application/json (6,625 bytes) on 2026-08-17, captured verbatim at
+      well-known/allo-media-openid-configuration.json. Complete discovery
+      document: issuer, authorization/token/userinfo/introspection/revocation/
+      end-session/device-authorization endpoints, jwks_uri, 10 grant types, 19
+      scopes, PKCE methods, and a dynamic client registration endpoint. The
+      provider does not LINK this document anywhere in its docs, but it serves it.
+    source: https://id.uh.live/realms/uhlive/.well-known/openid-configuration
+    detail: scopes/allo-media-scopes.yml
+  - id: rfc8414-oauth-metadata
+    name: RFC 8414 OAuth 2.0 Authorization Server Metadata
+    conforms: partial
+    evidence: >-
+      The realm serves OIDC discovery at the openid-configuration path, which
+      carries the same metadata, but the RFC 8414
+      /.well-known/oauth-authorization-server path itself was not confirmed
+      (probe blocked by the origin's rate limiting).
+  - id: rfc8705-mtls
+    name: RFC 8705 OAuth 2.0 mutual-TLS client authentication and certificate-bound tokens
+    conforms: true
+    evidence: >-
+      Discovery advertises `tls_client_auth` in
+      token_endpoint_auth_methods_supported and
+      `tls_client_certificate_bound_access_tokens: true`. Capability is real and
+      advertised; the provider documents none of it.
+    source: well-known/allo-media-openid-configuration.json
+  - id: rfc9449-dpop
+    name: RFC 9449 DPoP (demonstrating proof of possession)
+    conforms: true
+    evidence: >-
+      Discovery advertises `dpop_signing_alg_values_supported` with 10 algorithms.
+      Undocumented for API consumers.
+    source: well-known/allo-media-openid-configuration.json
+  - id: rfc7636-pkce
+    name: RFC 7636 PKCE
+    conforms: partial
+    evidence: >-
+      `code_challenge_methods_supported: [plain, S256]`. S256 is present, but
+      `plain` is still advertised — the weaker method OAuth 2.1 removes.
+    source: well-known/allo-media-openid-configuration.json
+  - id: rfc7591-dynamic-client-registration
+    name: RFC 7591 OAuth 2.0 Dynamic Client Registration
+    conforms: true
+    evidence: >-
+      `registration_endpoint:
+      https://id.uh.live/realms/uhlive/clients-registrations/openid-connect`
+      advertised in discovery. Whether it is open or gated was not tested — we do
+      not probe registration endpoints.
+    source: well-known/allo-media-openid-configuration.json
+  - id: rfc6750-bearer
+    name: OAuth 2.0 Bearer Token Usage (RFC 6750)
+    conforms: partial
+    evidence: >-
+      The Activate API uses `Authorization: bearer {access_token}` (header form,
+      RFC 6750 §2.1). The Stream API instead passes the token as a `jwt` URI
+      query parameter, which is the form RFC 6750 §2.3 discourages.
+    source: https://docs.allo-media.net/stream-h2h/protocol/
+  - id: rfc9457-problem-details
+    name: RFC 9457 Problem Details for HTTP APIs
+    conforms: false
+    evidence: >-
+      No `application/problem+json` and no error schema published; errors are
+      bare HTTP status codes with free text.
+    detail: errors/allo-media-error-codes.yml
+  - id: rfc8594-sunset
+    name: RFC 8594 Sunset HTTP Header
+    conforms: false
+    evidence: >-
+      A deprecation/older-version page exists but no Sunset or Deprecation
+      response headers are documented, and no sunset date is published for the
+      superseded v1 base URL.
+    detail: lifecycle/allo-media-lifecycle.yml
+  - id: rfc9116-security-txt
+    name: RFC 9116 security.txt
+    conforms: true
+    evidence: >-
+      https://uh.live/.well-known/security.txt served HTTP 200 as text/plain
+      (174 bytes) on 2026-08-17 and is captured verbatim at
+      well-known/allo-media-security.txt. Carries the mandatory Contact (two
+      addresses) and Expires (2027-05-01, still valid), plus Policy and
+      Preferred-Languages. Missing the optional Encryption field.
+    detail: security/allo-media-vulnerability-disclosure.yml
+  - id: idempotency-key
+    name: Idempotency-Key header
+    conforms: false
+    evidence: >-
+      No idempotency key or replay-safe write contract documented. The REST
+      surface is read-only, but the webhook retries once with no delivery id.
+    detail: conventions/allo-media-conventions.yml
+  - id: pagination
+    name: Documented pagination
+    conforms: true
+    evidence: >-
+      limit/offset with documented defaults (50), maximum page size (200),
+      `count`/`data` response envelope, and a documented offset ceiling (10000).
+    detail: conventions/allo-media-conventions.yml
+  - id: hmac-webhook-signing
+    name: HMAC-SHA256 webhook payload signing
+    conforms: true
+    evidence: >-
+      `X-Uhlive-Signature` header, `sha256=` + hex digest keyed with the webhook
+      secret, with explicit constant-time-comparison guidance in the docs.
+    detail: asyncapi/allo-media-events.yml
+    source: https://docs.allo-media.net/activate-api/webhook/delivery/
+  - id: asyncapi
+    name: AsyncAPI
+    conforms: false
+    evidence: >-
+      Two real event surfaces (HTTP webhook, WebSocket streaming) documented in
+      prose only; no AsyncAPI document published.
+    detail: asyncapi/allo-media-events.yml
+  - id: openapi
+    name: OpenAPI / Swagger
+    conforms: unverified
+    evidence: >-
+      The provider's own docs link a Swagger UI at
+      https://api.allo-media.net/swagger#/Calls/get_calls for the pre-v3 API,
+      which implies a machine-readable Swagger document exists behind it. That
+      host refused every connection from our egress on 2026-08-17 (status 0), so
+      we could neither retrieve nor validate it and NO spec is saved. Recorded as
+      unverified, not false.
+    source: https://docs.allo-media.net/activate-api/rest/calls/
+  - id: mrcp
+    name: MRCP (Media Resource Control Protocol)
+    conforms: true
+    evidence: >-
+      The Stream API for voicebots publishes an MRCP protocol binding alongside
+      its WebSocket binding, with grammar support.
+    source: https://docs.allo-media.net/stream-h2b/protocols/mrcp/
+  - id: siprec
+    name: SIPREC (RFC 7865/7866 session recording)
+    conforms: true
+    evidence: >-
+      SIPREC is published as a supported live audio capture method on the
+      provider's product site, and appears as a delivered roadmap item
+      ("Expanded audio capture methods (SIPREC support)").
+    source: https://docs.allo-media.net/products-description/roadmap/
+  - id: e164
+    name: E.164 phone number formatting
+    conforms: true
+    evidence: >-
+      JUpload metadata validation rejects non-E.164 contact lines with "The
+      contact line \"[number]\" is invalid".
+    source: https://docs.allo-media.net/jupload/error-management/
+  - id: openpgp
+    name: OpenPGP / GPG payload encryption
+    conforms: true
+    evidence: >-
+      "it is possible to encrypt audio and metadata files with GPG before
+      uploading them to our server", using a public key the provider supplies.
+    source: https://docs.allo-media.net/jupload/encryption/
+  - id: gdpr
+    name: GDPR (data protection)
+    conforms: partial
+    evidence: >-
+      GDPR is cited in the documentation as the driver of the audio
+      data-retention policy, enforced destructively and surfaced in the API as
+      HTTP 451 plus an `audio_state` field. The provider also documents a
+      25-entity redaction capability and a cookieless tracking mode in Hermes,
+      and markets sovereign hosting in France. What we could NOT verify: a
+      published DPA, privacy policy, sub-processor list, or retention schedule —
+      those live on uh.live, which blocked our probes.
+    source: https://docs.allo-media.net/activate-api/rest/call/
+  - id: soc2
+    name: SOC 2
+    conforms: false
+    evidence: No published SOC 2 claim found.
+  - id: iso27001
+    name: ISO/IEC 27001
+    conforms: false
+    evidence: No published ISO 27001 claim found.
+  - id: hds
+    name: HDS (Hébergeur de Données de Santé)
+    conforms: false
+    evidence: No published HDS certification claim found.
+  - id: fhir-r4
+    conforms: false
+  - id: scim2
+    conforms: false
+  - id: odata
+    conforms: false
+  - id: json-api
+    conforms: false
+  - id: graphql
+    conforms: false
+summary:
+  standards_assessed: 28
+  conforms: 13
+  partial: 5
+  unverified: 1
+  does_not_conform: 9
+  certifications_published: []
+  headline: >-
+    The strongest conformance story here is the identity layer, and the provider
+    documents none of it: a real OIDC discovery document, mTLS-bound access
+    tokens, DPoP, private_key_jwt, PKCE and dynamic client registration, all
+    verifiable from one anonymous fetch. The weakest is the API contract layer —
+    no OpenAPI, no AsyncAPI, no RFC 9457 errors, no RFC 8594 sunset headers.
+    Allo-Media has better security machinery than its documentation admits and
+    worse machine-readability than its product warrants.

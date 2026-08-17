@@ -1,0 +1,104 @@
+generated: '2026-08-17'
+method: searched
+source: https://docs.allo-media.net/activate-api/rest/
+docs:
+  - https://docs.allo-media.net/activate-api/rest/getting-started/
+  - https://docs.allo-media.net/activate-api/rest/call/
+  - https://docs.allo-media.net/activate-api/rest/calls/exclude-fields/
+  - https://docs.allo-media.net/jupload/error-management/
+format: http-status
+format_note: >-
+  NOT RFC 9457. The provider publishes no `application/problem+json` media type,
+  no `type` URIs, and no error-code registry — errors are HTTP status codes with
+  free-text detail. Captured as `errors/allo-media-error-codes.yml` (the
+  non-payments ErrorCatalog shape) rather than `-problem-types.yml`, because
+  there are no problem types to record. Derived from the documentation, not from
+  an OpenAPI: no machine-readable spec was reachable in this pass.
+envelope:
+  media_type: application/json
+  schema_documented: false
+  note: No error response schema is published for any documented status code.
+problems:
+  - status: 400
+    title: Bad Request
+    surface: Activate API (REST)
+    trigger: >-
+      An invalid field name passed to the `exclude` query parameter.
+    detail: "returns a `400 Bad Request` status with details about the error"
+    remediation: >-
+      Pass only first-level Call fields to `exclude`, and never `unique_id`
+      (which cannot be excluded).
+    source: https://docs.allo-media.net/activate-api/rest/calls/exclude-fields/
+  - status: 404
+    title: Not Found
+    surface: Activate API (REST)
+    trigger: Requesting details for a call `unique_id` that does not exist.
+    operation: GET /calls/{unique_id}
+    remediation: >-
+      Only Calls that have completed processing (transcription, redaction,
+      analysis, tagging) are exposed; a call still being processed is not
+      retrievable and will not appear.
+    source: https://docs.allo-media.net/activate-api/rest/call/
+  - status: 429
+    title: Too Many Requests
+    surface: Activate API (REST)
+    trigger: >-
+      "The API usage is limited to 40 requests per IP during the last 10
+      seconds. If you reach this limit, you will receive an HTTP 429 Too Many
+      Requests status code."
+    remediation: >-
+      Throttle to under 40 requests per rolling 10 seconds per source IP. No
+      Retry-After or rate-limit headers are documented, so back-off must be
+      client-side and blind.
+    detail_artifact: rate-limits/allo-media-rate-limits.yml
+    source: https://docs.allo-media.net/activate-api/rest/getting-started/
+  - status: 451
+    title: Unavailable For Legal Reasons
+    surface: Activate API (REST)
+    trigger: >-
+      Requesting call audio that is no longer available because it has passed
+      the GDPR data-retention window.
+    operation: GET /calls/{unique_id}/audio
+    remediation: >-
+      Check the Call object's `audio_state` field ("available" / "missing")
+      before requesting audio. Retention is a hard deletion, so a 451 is
+      permanent and must not be retried.
+    note: >-
+      A genuinely well-chosen status code — 451 for retention-expired media is
+      more informative than the 404 or 410 most providers return, and it is a
+      real signal to an agent that the resource is gone for policy reasons
+      rather than transiently.
+    source: https://docs.allo-media.net/activate-api/rest/call/
+jupload_errors:
+  surface: JUpload (SFTP batch ingestion)
+  reporting: >-
+    Out-of-band. Errors are written to daily log files in the `errors`
+    sub-directory of the customer's FTP folder, named with a date prefix (e.g.
+    `2021-01-01_error.log`), listing the offending file and the reason. Logs
+    older than 60 days are deleted automatically. There is no API to read them.
+  source: https://docs.allo-media.net/jupload/error-management/
+  errors:
+    - message: "this type of file is not managed by the application"
+      cause: Unsupported file format.
+      remediation: >-
+        Verify the metadata file has a valid extension and the audio complies
+        with the documented format requirements.
+    - message: "the JSON file cannot be decoded: {reason}"
+      cause: Invalid JSON syntax in the metadata file.
+      remediation: >-
+        Fix the JSON structure; `{reason}` carries the Python json decoder's own
+        message identifying the fault.
+    - message: "The call date \"[date]\" is invalid: {reason}"
+      cause: Call date does not match the expected format.
+      remediation: Use the documented date format for metadata.
+    - message: "The contact line \"[number]\" is invalid"
+      cause: Phone number not in the expected format.
+      remediation: Use E.164 formatting for phone numbers.
+x-gaps:
+  - No error-code registry, no machine-readable error schema, no RFC 9457.
+  - No documented 401/403 semantics for an expired or invalid bearer token,
+    despite two different token TTLs (60 min REST / 5 min stream).
+  - No documented error taxonomy for the WebSocket Stream API beyond `phx_reply`
+    responses to `phx_join`.
+  - JUpload failures are only discoverable by polling an SFTP log directory,
+    which no agent or automated consumer can react to in real time.

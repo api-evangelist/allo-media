@@ -1,0 +1,194 @@
+generated: '2026-08-17'
+method: probed
+source: https://id.uh.live/realms/uhlive/.well-known/openid-configuration
+artifact: well-known/allo-media-openid-configuration.json
+docs: null
+docs_note: >-
+  The provider publishes NO scopes or permissions reference page. Every scope
+  below was read from the live OIDC discovery document of the Keycloak realm the
+  provider's own documentation names as its token endpoint — not from
+  documentation, and not derived from an OpenAPI (there is none).
+note: >-
+  This is the most interesting thing recovered from Allo-Media in this pass. The
+  developer documentation states only that you exchange a client_id and
+  client_secret for a token; it never mentions scopes at all. The realm's
+  discovery document exposes a per-product scope model that the docs are silent
+  about, including one scope — `voip-callapi` — for a surface that has no public
+  documentation page whatsoever.
+  Because these come from `scopes_supported` on the realm, they are the scopes the
+  AUTHORIZATION SERVER can issue, not necessarily the scopes any given client is
+  granted or that a given API enforces. Product mappings below are marked with an
+  honest confidence: the names map onto documented product surfaces
+  one-for-one, but no provider documentation confirms the binding.
+schemes:
+- name: uhlive_keycloak_realm
+  type: openIdConnect
+  issuer: https://id.uh.live/realms/uhlive
+  discovery: https://id.uh.live/realms/uhlive/.well-known/openid-configuration
+  jwks_uri: https://id.uh.live/realms/uhlive/protocol/openid-connect/certs
+  flows:
+  - flow: clientCredentials
+    tokenUrl: https://id.uh.live/realms/uhlive/protocol/openid-connect/token
+    documented: true
+    note: the only flow the provider's developer docs describe
+  - flow: authorizationCode
+    authorizationUrl: https://id.uh.live/realms/uhlive/protocol/openid-connect/auth
+    tokenUrl: https://id.uh.live/realms/uhlive/protocol/openid-connect/token
+    documented: false
+    note: >-
+      Advertised by the realm but not documented for API consumers; presumably
+      serves the WebApp/Scribr human login rather than API integrations.
+  - flow: deviceCode
+    deviceAuthorizationUrl: https://id.uh.live/realms/uhlive/protocol/openid-connect/auth/device
+    documented: false
+  - flow: password
+    documented: false
+    note: >-
+      Resource-owner password grant is still enabled on the realm. It is
+      deprecated in OAuth 2.1 and generally should be off; flagged as an
+      observation, not an exploit.
+  - flow: refreshToken
+    documented: false
+  - flow: tokenExchange
+    grant: urn:ietf:params:oauth:grant-type:token-exchange
+    documented: false
+  - flow: jwtBearer
+    grant: urn:ietf:params:oauth:grant-type:jwt-bearer
+    documented: false
+  - flow: uma
+    grant: urn:ietf:params:oauth:grant-type:uma-ticket
+    documented: false
+  - flow: ciba
+    grant: urn:openid:params:grant-type:ciba
+    backchannel_authentication_endpoint: https://id.uh.live/realms/uhlive/protocol/openid-connect/ext/ciba/auth
+    documented: false
+scopes:
+- scope: activate
+  description: >-
+    Access to the Activate API — the read-only REST surface over processed calls
+    at https://activate.uh.live.
+  product: Allo-Media Activate API
+  api: allo-media-activate-api
+  confidence: high
+  sources: [well-known/allo-media-openid-configuration.json]
+- scope: stream-h2h
+  description: >-
+    Access to the Stream API for humans (real-time human-to-human transcription
+    over WebSocket) — protocol V1.
+  product: Allo-Media Stream API for Humans
+  api: allo-media-stream-api-humans
+  confidence: high
+  sources: [well-known/allo-media-openid-configuration.json]
+- scope: stream-h2h-v2
+  description: >-
+    Access to the Stream API for humans, protocol V2 — the current version.
+  product: Allo-Media Stream API for Humans
+  api: allo-media-stream-api-humans
+  confidence: high
+  note: >-
+    A separate scope per protocol version. That is real evidence the V1/V2 split
+    is enforced at the authorization server, so a V1 client's token will not
+    simply work against V2 — a migration detail the deprecation docs do not
+    mention.
+  sources: [well-known/allo-media-openid-configuration.json]
+- scope: stream-h2b
+  description: >-
+    Access to the Stream API for voicebots (human-to-bot, MRCP/WebSocket).
+  product: Allo-Media Stream API for Voicebots
+  api: allo-media-stream-api-voicebots
+  confidence: high
+  sources: [well-known/allo-media-openid-configuration.json]
+- scope: voip-callapi
+  description: >-
+    A VoIP / call API scope with no corresponding public documentation page.
+  product: unknown
+  confidence: low
+  note: >-
+    The only scope that does not map onto a documented product. There is no
+    "call API" or VoIP section anywhere in the documentation sitemap. Recorded as
+    an undocumented surface rather than guessed at — this is a real question to
+    put to the provider, not a finding to publish as a product.
+  sources: [well-known/allo-media-openid-configuration.json]
+- scope: scribr
+  description: >-
+    Access to Scribr, the hosted search interface over calls and transcripts.
+  product: Scribr
+  confidence: high
+  note: >-
+    Scribr is documented as a product UI with its own search syntax; the scope
+    suggests it is served by an API behind the realm, though no Scribr API is
+    documented.
+  sources: [well-known/allo-media-openid-configuration.json]
+- scope: service_account
+  description: Machine/service-account identity scope (Keycloak client credentials).
+  category: platform
+  confidence: medium
+  sources: [well-known/allo-media-openid-configuration.json]
+- scope: app_metadata
+  description: Application metadata claims.
+  category: platform
+  confidence: medium
+  sources: [well-known/allo-media-openid-configuration.json]
+- scope: basic
+  description: Keycloak built-in basic claims scope.
+  category: standard
+  confidence: high
+  sources: [well-known/allo-media-openid-configuration.json]
+- scope: openid
+  description: OIDC required scope.
+  category: standard
+  confidence: high
+- scope: profile
+  category: standard
+- scope: email
+  category: standard
+- scope: address
+  category: standard
+- scope: phone
+  category: standard
+- scope: roles
+  category: standard
+- scope: web-origins
+  category: standard
+- scope: offline_access
+  category: standard
+- scope: acr
+  category: standard
+- scope: microprofile-jwt
+  category: standard
+summary:
+  scopes_total: 19
+  product_scopes: 6
+  platform_scopes: 2
+  standard_oidc_scopes: 11
+  documented_by_provider: 0
+  undocumented_product_surfaces: 1
+x-security-posture:
+  note: >-
+    Read from the same discovery document. This realm is configured well above the
+    baseline, which is worth recording because it contrasts sharply with the
+    provider's thin API documentation.
+  pkce: [plain, S256]
+  pkce_note: >-
+    S256 supported; `plain` is also still advertised, which is the weaker option
+    OAuth 2.1 removes.
+  token_endpoint_auth_methods:
+  - private_key_jwt
+  - client_secret_basic
+  - client_secret_post
+  - tls_client_auth
+  - client_secret_jwt
+  mtls_client_auth: true
+  mtls_bound_access_tokens: true
+  dpop: true
+  dpop_algs: [PS384, RS384, EdDSA, ES384, ES256, RS256, ES512, PS256, PS512, RS512]
+  introspection_endpoint: https://id.uh.live/realms/uhlive/protocol/openid-connect/token/introspect
+  revocation_endpoint: https://id.uh.live/realms/uhlive/protocol/openid-connect/revoke
+  dynamic_client_registration_endpoint: https://id.uh.live/realms/uhlive/clients-registrations/openid-connect
+  assessment: >-
+    mTLS-bound access tokens, DPoP, private_key_jwt and a dynamic client
+    registration endpoint are all advertised — capabilities most catalogued
+    providers do not offer. They are also Keycloak defaults, so their presence
+    proves the platform supports them, not that Allo-Media requires or documents
+    them. The gap here is documentation, not capability: a customer reading the
+    developer docs would never learn that sender-constrained tokens are an option.

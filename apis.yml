@@ -1,19 +1,163 @@
 aid: allo-media
 name: Allo-Media
-description: 'Allo-Media is a company surfaced as a portfolio company of serena and added to the API Evangelist
-  network as a stub for enrichment. Sector: ai-data. This profile is a lead awaiting the enrichment pipeline.'
+description: >-
+  Allo-Media, which now trades as uh!ive, is a French conversational-voice-AI
+  company that transcribes and analyses telephone conversations in real time and
+  in batch. Its platform pairs speech-to-text tuned for 8kHz telephony with named
+  entity recognition and redaction, speech analytics (intent, emotion and
+  compliance tagging) and call tracking, hosted in France. Developers integrate
+  through four surfaces: a read-only Activate REST API over processed calls and
+  their transcripts, a WebSocket Stream API for live human-to-human conversations,
+  an MRCP/WebSocket Stream API for voicebots, and a browser call-tracking script
+  (Hermes), plus SFTP batch ingestion (JUpload) and an HMAC-signed webhook.
+  Authentication is OAuth 2.0 client_credentials against a Keycloak realm;
+  credentials are issued by an account manager rather than self-service.
+image: https://avatars.githubusercontent.com/u/30897478?v=4
 url: https://raw.githubusercontent.com/api-evangelist/allo-media/refs/heads/main/apis.yml
 x-type: company
 x-source: serena-portfolio
-x-tier: stub
-x-tier-reason: portfolio-lead
+x-also-known-as: uh!ive
 specificationVersion: '0.20'
 created: '2026-08-17'
 modified: '2026-08-17'
+x-enrichment:
+  date: '2026-08-17'
+  status: enriched
+  artifacts_added: 22
+  pass: local-v1
 tags:
 - Company
 - Ai Data
-apis: []
+- Speech Recognition
+- Speech To Text
+- Conversation Intelligence
+- Call Tracking
+- Voice AI
+- Natural Language Processing
+- Call Analytics
+- Contact Center
+- Speech Analytics
+- Transcription
+- France
+apis:
+- aid: allo-media-activate-api
+  name: Allo-Media Activate API
+  description: >-
+    Read-only REST API over calls that have finished processing on the Allo-Media
+    platform — transcription, redaction, analysis and tagging complete. Three
+    operations: list calls with date/status filters and limit/offset paging,
+    retrieve one call by unique_id, and download that call's audio. Audio past its
+    GDPR retention window returns HTTP 451. Version 3.0.0, on the base
+    https://activate.uh.live since 2024-07-01.
+  humanURL: https://docs.allo-media.net/activate-api/rest/
+  baseURL: https://activate.uh.live
+  tags:
+  - Transcription
+  - Call Analytics
+  - Speech Analytics
+  - REST
+  properties:
+  - type: Documentation
+    url: https://docs.allo-media.net/activate-api/rest/
+  - type: GettingStarted
+    url: https://docs.allo-media.net/activate-api/rest/getting-started/
+  - type: Authentication
+    url: authentication/allo-media-authentication.yml
+  - type: OAuthScopes
+    url: scopes/allo-media-scopes.yml
+  - type: Conventions
+    url: conventions/allo-media-conventions.yml
+  - type: ErrorCatalog
+    url: errors/allo-media-error-codes.yml
+  - type: RateLimits
+    url: rate-limits/allo-media-rate-limits.yml
+  - type: DataModel
+    url: data-model/allo-media-data-model.yml
+  - type: Webhooks
+    url: asyncapi/allo-media-events.yml
+  - type: ChangeLog
+    url: https://docs.allo-media.net/activate-api/rest/releases-notes/
+  - type: Deprecation
+    url: https://docs.allo-media.net/activate-api/rest/older-version/
+- aid: allo-media-stream-api-humans
+  name: Allo-Media Stream API for Humans
+  description: >-
+    Real-time transcription of live human-to-human conversations over a WebSocket
+    (Phoenix Channels). A client joins a conversation, streams binary audio
+    chunks, and receives interim and final decoded segments plus speaker join and
+    leave events, named entities and analytics tags. Protocol V2 is current, V1 is
+    deprecated. Bandwidth is capped at 20 kB/second per connection.
+  humanURL: https://docs.allo-media.net/stream-h2h/
+  baseURL: https://api.uh.live
+  tags:
+  - Speech Recognition
+  - Streaming
+  - WebSocket
+  - Real Time
+  properties:
+  - type: Documentation
+    url: https://docs.allo-media.net/stream-h2h/
+  - type: APIReference
+    url: https://docs.allo-media.net/stream-h2h/protocol/
+  - type: GettingStarted
+    url: https://docs.allo-media.net/stream-h2h/python/getting-started/
+  - type: WebSocket
+    url: wss://api.uh.live/socket/websocket
+  - type: Authentication
+    url: authentication/allo-media-authentication.yml
+  - type: JavaScript SDK
+    url: https://www.npmjs.com/package/@uhlive/javascript-sdk
+  - type: Python SDK
+    url: https://pypi.org/project/uhlive/
+  - type: ChangeLog
+    url: https://docs.allo-media.net/stream-h2h/protocol/releases-notes/
+- aid: allo-media-stream-api-voicebots
+  name: Allo-Media Stream API for Voicebots
+  description: >-
+    Real-time speech recognition for voicebots and IVR (human-to-bot), offered
+    over either MRCP or WebSocket, with regex-based grammars constraining expected
+    input. Documents its own input/output model, grammar availability and
+    troubleshooting guidance.
+  humanURL: https://docs.allo-media.net/stream-h2b/
+  baseURL: https://api.uh.live
+  tags:
+  - Speech Recognition
+  - Voicebot
+  - MRCP
+  - IVR
+  properties:
+  - type: Documentation
+    url: https://docs.allo-media.net/stream-h2b/
+  - type: APIReference
+    url: https://docs.allo-media.net/stream-h2b/protocols/
+  - type: GettingStarted
+    url: https://docs.allo-media.net/stream-h2b/getting-started/
+  - type: Authentication
+    url: https://docs.allo-media.net/stream-h2b/protocols/authentication/
+  - type: ChangeLog
+    url: https://docs.allo-media.net/stream-h2b/releases-notes/
+- aid: allo-media-hermes
+  name: Allo-Media Hermes Call Tracking
+  description: >-
+    First-party browser JavaScript that performs dynamic number insertion so an
+    inbound phone call can be attributed back to a web session — the mechanism
+    behind the Vocal Cookie lead-attribution product. Loaded as an unpinned script
+    from the provider's CDN, exposes the `am` global, and documents a cookieless
+    tracking mode plus localStorage and selector-scoping options.
+  humanURL: https://docs.allo-media.net/hermes/
+  baseURL: https://hermes.allo-media.net
+  tags:
+  - Call Tracking
+  - JavaScript
+  - Attribution
+  - Marketing
+  properties:
+  - type: Documentation
+    url: https://docs.allo-media.net/hermes/
+  - type: GettingStarted
+    url: https://docs.allo-media.net/hermes/getting-started/
+  - type: Components
+    url: components/allo-media-components.yml
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
@@ -21,4 +165,72 @@ maintainers:
   email: info@apis.io
 common:
 - type: Website
-  url: https://www.allo-media.net/
+  url: https://uh.live/en/
+- type: DeveloperPortal
+  url: https://docs.allo-media.net/
+- type: Documentation
+  url: https://docs.allo-media.net/
+- type: APIReference
+  url: https://docs.allo-media.net/activate-api/rest/
+- type: GettingStarted
+  url: https://docs.allo-media.net/activate-api/rest/getting-started/
+- type: Support
+  url: https://uh.live/en/contact/
+- type: Blog
+  url: https://uh.live/en/articles/
+- type: GitHubOrganization
+  url: https://github.com/allo-media
+- type: SourceCode
+  url: https://github.com/uhlive
+- type: Roadmap
+  url: https://docs.allo-media.net/products-description/roadmap/
+- type: StatusPage
+  url: https://status.uh.live/
+- type: Deprecation
+  url: https://docs.allo-media.net/activate-api/rest/older-version/
+- type: TermsOfService
+  url: https://uh.live/en/legal-notices/
+- type: Integrations
+  url: https://docs.allo-media.net/integrations/
+- type: Authentication
+  url: authentication/allo-media-authentication.yml
+- type: OAuthScopes
+  url: scopes/allo-media-scopes.yml
+- type: OpenIDConnect
+  url: well-known/allo-media-openid-configuration.json
+- type: Conventions
+  url: conventions/allo-media-conventions.yml
+- type: ErrorCatalog
+  url: errors/allo-media-error-codes.yml
+- type: Lifecycle
+  url: lifecycle/allo-media-lifecycle.yml
+- type: ChangeLog
+  url: changelog/allo-media-changelog.yml
+- type: RateLimits
+  url: rate-limits/allo-media-rate-limits.yml
+- type: Plans
+  url: plans/allo-media-plans-pricing.yml
+- type: DataModel
+  url: data-model/allo-media-data-model.yml
+- type: Components
+  url: components/allo-media-components.yml
+- type: Conformance
+  url: conformance/allo-media-conformance.yml
+- type: Webhooks
+  url: asyncapi/allo-media-events.yml
+- type: Packages
+  url: packages/allo-media-packages.yml
+- type: SDKs
+  url: packages/allo-media-packages.yml
+- type: LLMsTxt
+  url: llms/allo-media-llms.txt
+- type: WellKnown
+  url: well-known/allo-media-well-known.yml
+- type: SecurityTxt
+  url: https://uh.live/.well-known/security.txt
+- type: VulnerabilityDisclosure
+  url: security/allo-media-vulnerability-disclosure.yml
+- type: Security
+  url: https://uh.live/.well-known/security.txt
+- type: DomainSecurity
+  url: security/allo-media-domain-security.yml

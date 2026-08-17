@@ -1,0 +1,121 @@
+generated: '2026-08-17'
+method: searched
+source: https://docs.allo-media.net/activate-api/rest/releases-notes/
+docs:
+  - https://docs.allo-media.net/activate-api/rest/releases-notes/
+  - https://docs.allo-media.net/activate-api/rest/older-version/
+  - https://docs.allo-media.net/products-description/roadmap/
+versioning:
+  scheme: major version tied to the base hostname
+  current: 3.0.0
+  current_since: '2024-07-01'
+  docs: https://docs.allo-media.net/activate-api/rest/releases-notes/
+  note: >-
+    There is no version path segment and no version header. The version IS the
+    host: v1.x lives on https://api.allo-media.net, v3.0.0 lives on
+    https://activate.uh.live. A client cannot negotiate versions on one origin,
+    and the cutover also changed the authentication method, so it is a hard
+    migration rather than a versioned upgrade.
+deprecation:
+  policy_url: https://docs.allo-media.net/activate-api/rest/older-version/
+  policy_published: true
+  sunset_header: false
+  deprecation_header: false
+  sunset_date: null
+  detail: >-
+    The provider maintains a dedicated "older version" page for the pre-v3 API
+    ("If you've started using the API before July, 1st 2024, this is the page for
+    you") documenting the superseded base URL https://api.allo-media.net
+    alongside the current one. v3.0.0 is described as deprecating "some keys in
+    the payload" and adding new ones.
+    WHAT IS MISSING, and it matters: no sunset date for the old base URL, no
+    RFC 8594 `Sunset` or `Deprecation` response headers, and no list of which
+    payload keys were actually deprecated. Two years after the cutover a
+    v1-era integration has no machine-readable warning and no published
+    end-of-life to plan against.
+  deprecated_versions:
+    - version: 1.x
+      base_url: https://api.allo-media.net
+      superseded: '2024-07-01'
+      superseded_by: 3.0.0
+      docs: https://docs.allo-media.net/activate-api/rest/older-version/
+      still_documented: true
+      sunset_date: null
+  deprecated_surfaces:
+    - name: Stream API protocol V1
+      status: deprecated
+      superseded_by: Stream API protocol V2
+      docs: https://docs.allo-media.net/stream-h2h/protocol-v1/
+      sunset_date: null
+      note: >-
+        Both V1 and V2 protocol references are published side by side, V1 marked
+        deprecated, with no sunset date.
+deprecated_operations: []
+deprecated_operations_note: >-
+  Cannot be derived — there is no OpenAPI in this repo to read `deprecated: true`
+  from. Recorded as empty because it was not measurable, not because the answer
+  is zero.
+status_page:
+  url: https://status.uh.live/
+  verified: probed
+  http_status: 200
+  probed: '2026-08-17'
+  note: >-
+    Live public status page on the rebranded uh.live domain, reachable
+    (HTTP 200, 20,709 bytes) even while the provider's OVH-hosted API origins
+    were refusing our connections — it is hosted separately.
+sla:
+  url: null
+  uptime_target: null
+  note: >-
+    No public SLA or uptime commitment found. The provider's docs route
+    commercial terms through an account manager, and no SLA page was reachable
+    on uh.live during this pass.
+roadmap:
+  url: https://docs.allo-media.net/products-description/roadmap/
+  published: true
+  last_updated: '2026-01-16'
+  buckets: [Previously achieved, In progress, Next, Later]
+  note: >-
+    A genuinely public, dated, four-bucket product roadmap — rare for a company
+    this size. API-relevant items include, verbatim from the page's themes:
+    "Better integrating Stream H2H into the core platform" (Next), and under
+    Later, "Enhancing API self-service onboarding capabilities", "Exposing
+    additional platform usage data and metrics", and "Implementing granular data
+    retention policies". The provider is therefore aware that self-service API
+    onboarding is a gap — it is on their own roadmap.
+data_retention:
+  documented: true
+  docs: https://docs.allo-media.net/jupload/data-retention/
+  enforcement: >-
+    Retention is enforced destructively and surfaced in the API: call audio past
+    its retention window returns HTTP 451 Unavailable For Legal Reasons, and the
+    Call object carries an `audio_state` field ("available" / "missing").
+    JUpload error logs are themselves deleted after 60 days.
+  note: GDPR-driven per the Activate API call documentation.
+release_notes_surfaces:
+  - https://docs.allo-media.net/activate-api/rest/releases-notes/
+  - https://docs.allo-media.net/activate-api/webhook/releases-notes/
+  - https://docs.allo-media.net/jupload/releases-notes/
+  - https://docs.allo-media.net/stream-h2h/protocol/releases-notes/
+  - https://docs.allo-media.net/stream-h2h/protocol-v1/releases-notes/
+  - https://docs.allo-media.net/stream-h2b/releases-notes/
+  - https://docs.allo-media.net/downloads/release-notes/uhlive-python-sdk/
+  - https://docs.allo-media.net/downloads/release-notes/uhlive-javascript-sdk/
+release_notes_note: >-
+  Eight separate dated release-note streams, one per product/protocol/SDK — there
+  is no single unified changelog. Captured in
+  changelog/allo-media-changelog.yml.
+x-rebrand:
+  from: Allo-Media (allo-media.net)
+  to: uh!ive (uh.live)
+  evidence:
+    - https://www.allo-media.net/ 301s to https://uh.live/en/
+    - github.com/allo-media ("Groupe Allo-Media") lists https://uh.live as its website
+    - github.com/uhlive ("uh!ive") lists https://www.uh.live
+    - API hosts moved from api.allo-media.net to activate.uh.live / api.uh.live at v3.0.0
+  note: >-
+    The company-level rename is itself an unmanaged lifecycle event for API
+    consumers: the documentation still lives on docs.allo-media.net under the old
+    brand while every runtime host has moved to uh.live, and the webhook
+    signature header is already `X-Uhlive-Signature`.

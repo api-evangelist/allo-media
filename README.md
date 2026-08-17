@@ -42,6 +42,40 @@
 > Full detail: **[Where this data comes from](https://apievangelist.com/about/where-our-data-comes-from)**
 <!-- API-EVANGELIST-PROVENANCE:END -->
 
-Allo-Media is a company surfaced as a portfolio company of serena and added to the API Evangelist network as a stub for enrichment. Sector: ai-data. This profile is a lead awaiting the enrichment pipeline.
+Allo-Media, which now trades as **uh!ive**, is a French conversational-voice-AI company that
+transcribes and analyses telephone conversations in real time and in batch — speech-to-text tuned for
+8kHz telephony, named entity recognition and redaction, speech analytics, and call tracking.
 
-Source: portfolio company of [serena](https://github.com/api-evangelist/serena) — https://www.allo-media.net/
+`www.allo-media.net` now 301s to `https://uh.live/en/`, and every runtime API host has moved to the
+`uh.live` domain, but the developer documentation still lives at
+[docs.allo-media.net](https://docs.allo-media.net/) under the old brand.
+
+## API surface
+
+| API | Base | Docs |
+|---|---|---|
+| Activate API (REST, read-only over processed calls) | `https://activate.uh.live` | [docs](https://docs.allo-media.net/activate-api/rest/) |
+| Stream API for humans (WebSocket, real-time transcription) | `wss://api.uh.live/socket/websocket` | [docs](https://docs.allo-media.net/stream-h2h/) |
+| Stream API for voicebots (MRCP / WebSocket) | `https://api.uh.live` | [docs](https://docs.allo-media.net/stream-h2b/) |
+| Hermes (browser call-tracking script) | `https://hermes.allo-media.net` | [docs](https://docs.allo-media.net/hermes/) |
+
+Plus JUpload (SFTP batch ingestion) and an HMAC-SHA256-signed webhook. Authentication is OAuth 2.0
+`client_credentials` against a Keycloak realm; credentials come from an account manager, not
+self-service.
+
+## What this profile found
+
+- **No OpenAPI, AsyncAPI, GraphQL, MCP server or A2A agent card.** `/.well-known/agent-card.json` and
+  `/.well-known/agent.json` return 404 on every host. The docs link a Swagger UI for the pre-v3 API at
+  `api.allo-media.net/swagger`, but that host refused every probe.
+- **The only machine-readable contract the company serves is its identity layer** — a full Keycloak
+  OIDC discovery document, captured verbatim in `well-known/`. It exposes a per-product scope model
+  (`activate`, `stream-h2h`, `stream-h2h-v2`, `stream-h2b`, `scribr`, and an undocumented
+  `voip-callapi`) that the developer documentation never mentions, plus mTLS-bound access tokens, DPoP
+  and dynamic client registration.
+- A valid RFC 9116 `security.txt`, a public dated product roadmap, a public status page, eight separate
+  release-note streams, and two official SDKs (`uhlive` on PyPI, `@uhlive/javascript-sdk` on npm).
+- No published pricing or plans; enterprise sales-led, with self-service API onboarding sitting on the
+  company's own public roadmap under "Later".
+
+Source: portfolio company of [serena](https://github.com/api-evangelist/serena) — https://uh.live/en/

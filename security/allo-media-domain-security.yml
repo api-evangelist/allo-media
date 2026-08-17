@@ -1,0 +1,58 @@
+generated: '2026-08-17'
+method: probed
+source: live DNS/TLS/HTTP probes of apis.yml + OpenAPI hosts
+note: >-
+  Probed 2026-08-17. Findings worth reading rather than just recording:
+  TLS 1.3 on all three reachable hosts with valid certs. HSTS is enabled on the
+  marketing host uh.live (max-age 16,000,000 ~ 185 days) but NOT on the API host
+  activate.uh.live or the docs host — the inverse of the priority you would want,
+  since the API host is where bearer tokens travel.
+  The two registrable domains are managed to different standards: allo-media.net
+  has DNSSEC enabled but NO DMARC record, while uh.live has DMARC at p=reject
+  (strong) but no DNSSEC. Each domain has the control the other is missing, which
+  is the signature of a rebrand where DNS hygiene was rebuilt rather than
+  carried across. Both publish SPF and both publish CAA (uh.live pins Let's
+  Encrypt, DigiCert and Comodo; allo-media.net pins the same three including
+  wildcards).
+  Reachability caveat: api.uh.live and hermes.allo-media.net could not be probed
+  in this pass because the provider's edge intermittently refuses connections
+  from a single source IP after a short burst; their absence below is our
+  limitation, not a provider defect.
+hosts:
+- host: uh.live
+  https: true
+  tls_version: TLSv1.3
+  cert_expires: Nov 15 09:34:08 2026 GMT
+  hsts: true
+  hsts_max_age: 16000000
+- host: docs.allo-media.net
+  https: true
+  tls_version: TLSv1.3
+  cert_expires: Oct  6 16:59:19 2026 GMT
+  hsts: false
+- host: activate.uh.live
+  https: true
+  tls_version: TLSv1.3
+  cert_expires: Nov 15 09:34:08 2026 GMT
+  hsts: false
+domains:
+- domain: uh.live
+  dnssec: false
+  caa:
+  - 0 issue "letsencrypt.org"
+  - 0 issue "digicert.com"
+  - 0 issue "comodoca.com"
+  spf: true
+  dmarc: true
+  dmarc_policy: reject
+- domain: allo-media.net
+  dnssec: true
+  caa:
+  - 0 issue "comodoca.com"
+  - 0 issuewild "comodoca.com"
+  - 0 issue "digicert.com"
+  - 0 issuewild "digicert.com"
+  - 0 issuewild "letsencrypt.org"
+  - 0 issue "letsencrypt.org"
+  spf: true
+  dmarc: false
