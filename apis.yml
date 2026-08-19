@@ -17,7 +17,7 @@ url: https://raw.githubusercontent.com/api-evangelist/allo-media/refs/heads/main
 x-type: company
 x-source: serena-portfolio
 x-also-known-as: uh!ive
-specificationVersion: '0.20'
+specificationVersion: '0.23'
 created: '2026-08-17'
 modified: '2026-08-17'
 x-enrichment:
