@@ -29,6 +29,20 @@ tags:
 - Company
 - Ai Data
 - Speech Recognition
+- Speech-to-Text
+- Conversation Intelligence
+- Call Tracking
+- Voice AI
+- Natural Language Processing
+- Call Analytics
+- Contact Center
+- Speech Analytics
+- Transcription
+- France
+tags_raw:
+- Company
+- Ai Data
+- Speech Recognition
 - Speech To Text
 - Conversation Intelligence
 - Call Tracking
@@ -90,6 +104,11 @@ apis:
   humanURL: https://docs.allo-media.net/stream-h2h/
   baseURL: https://api.uh.live
   tags:
+  - Speech Recognition
+  - Streaming
+  - WebSocket
+  - Real-Time
+  tags_raw:
   - Speech Recognition
   - Streaming
   - WebSocket
