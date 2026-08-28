@@ -12,6 +12,17 @@ description: >-
   (Hermes), plus SFTP batch ingestion (JUpload) and an HMAC-signed webhook.
   Authentication is OAuth 2.0 client_credentials against a Keycloak realm;
   credentials are issued by an account manager rather than self-service.
+deliveryModel:
+  model: saas
+  open_source: false
+  commercial: true
+  callable_host: false
+  label: Hosted service · you call their endpoint
+  confidence: medium
+  source:
+  - pricing
+  generated: '2026-08-28'
+  method: derived
 image: https://avatars.githubusercontent.com/u/30897478?v=4
 url: https://raw.githubusercontent.com/api-evangelist/allo-media/refs/heads/main/apis.yml
 x-type: company
