@@ -1,17 +1,14 @@
 aid: allo-media
 name: Allo-Media
-description: >-
-  Allo-Media, which now trades as uh!ive, is a French conversational-voice-AI
-  company that transcribes and analyses telephone conversations in real time and
-  in batch. Its platform pairs speech-to-text tuned for 8kHz telephony with named
-  entity recognition and redaction, speech analytics (intent, emotion and
-  compliance tagging) and call tracking, hosted in France. Developers integrate
-  through four surfaces: a read-only Activate REST API over processed calls and
-  their transcripts, a WebSocket Stream API for live human-to-human conversations,
-  an MRCP/WebSocket Stream API for voicebots, and a browser call-tracking script
-  (Hermes), plus SFTP batch ingestion (JUpload) and an HMAC-signed webhook.
-  Authentication is OAuth 2.0 client_credentials against a Keycloak realm;
-  credentials are issued by an account manager rather than self-service.
+description: 'Allo-Media, which now trades as uh!ive, is a French conversational-voice-AI company that
+  transcribes and analyses telephone conversations in real time and in batch. Its platform pairs speech-to-text
+  tuned for 8kHz telephony with named entity recognition and redaction, speech analytics (intent, emotion
+  and compliance tagging) and call tracking, hosted in France. Developers integrate through four surfaces:
+  a read-only Activate REST API over processed calls and their transcripts, a WebSocket Stream API for
+  live human-to-human conversations, an MRCP/WebSocket Stream API for voicebots, and a browser call-tracking
+  script (Hermes), plus SFTP batch ingestion (JUpload) and an HMAC-signed webhook. Authentication is OAuth
+  2.0 client_credentials against a Keycloak realm; credentials are issued by an account manager rather
+  than self-service.'
 deliveryModel:
   model: saas
   open_source: false
@@ -80,15 +77,13 @@ tags_raw:
 - Transcription
 - France
 apis:
-- aid: allo-media-activate-api
+- aid: allo-media:allo-media-activate-api
   name: Allo-Media Activate API
-  description: >-
-    Read-only REST API over calls that have finished processing on the Allo-Media
-    platform — transcription, redaction, analysis and tagging complete. Three
-    operations: list calls with date/status filters and limit/offset paging,
-    retrieve one call by unique_id, and download that call's audio. Audio past its
-    GDPR retention window returns HTTP 451. Version 3.0.0, on the base
-    https://activate.uh.live since 2024-07-01.
+  description: 'Read-only REST API over calls that have finished processing on the Allo-Media platform
+    — transcription, redaction, analysis and tagging complete. Three operations: list calls with date/status
+    filters and limit/offset paging, retrieve one call by unique_id, and download that call''s audio.
+    Audio past its GDPR retention window returns HTTP 451. Version 3.0.0, on the base https://activate.uh.live
+    since 2024-07-01.'
   humanURL: https://docs.allo-media.net/activate-api/rest/
   baseURL: https://activate.uh.live
   tags:
@@ -119,14 +114,12 @@ apis:
     url: https://docs.allo-media.net/activate-api/rest/releases-notes/
   - type: Deprecation
     url: https://docs.allo-media.net/activate-api/rest/older-version/
-- aid: allo-media-stream-api-humans
+- aid: allo-media:allo-media-stream-api-humans
   name: Allo-Media Stream API for Humans
-  description: >-
-    Real-time transcription of live human-to-human conversations over a WebSocket
-    (Phoenix Channels). A client joins a conversation, streams binary audio
-    chunks, and receives interim and final decoded segments plus speaker join and
-    leave events, named entities and analytics tags. Protocol V2 is current, V1 is
-    deprecated. Bandwidth is capped at 20 kB/second per connection.
+  description: Real-time transcription of live human-to-human conversations over a WebSocket (Phoenix
+    Channels). A client joins a conversation, streams binary audio chunks, and receives interim and final
+    decoded segments plus speaker join and leave events, named entities and analytics tags. Protocol V2
+    is current, V1 is deprecated. Bandwidth is capped at 20 kB/second per connection.
   humanURL: https://docs.allo-media.net/stream-h2h/
   baseURL: https://api.uh.live
   tags:
@@ -156,13 +149,11 @@ apis:
     url: https://pypi.org/project/uhlive/
   - type: ChangeLog
     url: https://docs.allo-media.net/stream-h2h/protocol/releases-notes/
-- aid: allo-media-stream-api-voicebots
+- aid: allo-media:allo-media-stream-api-voicebots
   name: Allo-Media Stream API for Voicebots
-  description: >-
-    Real-time speech recognition for voicebots and IVR (human-to-bot), offered
-    over either MRCP or WebSocket, with regex-based grammars constraining expected
-    input. Documents its own input/output model, grammar availability and
-    troubleshooting guidance.
+  description: Real-time speech recognition for voicebots and IVR (human-to-bot), offered over either
+    MRCP or WebSocket, with regex-based grammars constraining expected input. Documents its own input/output
+    model, grammar availability and troubleshooting guidance.
   humanURL: https://docs.allo-media.net/stream-h2b/
   baseURL: https://api.uh.live
   tags:
@@ -181,14 +172,12 @@ apis:
     url: https://docs.allo-media.net/stream-h2b/protocols/authentication/
   - type: ChangeLog
     url: https://docs.allo-media.net/stream-h2b/releases-notes/
-- aid: allo-media-hermes
+- aid: allo-media:allo-media-hermes
   name: Allo-Media Hermes Call Tracking
-  description: >-
-    First-party browser JavaScript that performs dynamic number insertion so an
-    inbound phone call can be attributed back to a web session — the mechanism
-    behind the Vocal Cookie lead-attribution product. Loaded as an unpinned script
-    from the provider's CDN, exposes the `am` global, and documents a cookieless
-    tracking mode plus localStorage and selector-scoping options.
+  description: First-party browser JavaScript that performs dynamic number insertion so an inbound phone
+    call can be attributed back to a web session — the mechanism behind the Vocal Cookie lead-attribution
+    product. Loaded as an unpinned script from the provider's CDN, exposes the `am` global, and documents
+    a cookieless tracking mode plus localStorage and selector-scoping options.
   humanURL: https://docs.allo-media.net/hermes/
   baseURL: https://hermes.allo-media.net
   tags:
