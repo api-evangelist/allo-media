@@ -64,40 +64,129 @@
 > Full detail: **[Where this data comes from](https://apievangelist.com/about/where-our-data-comes-from)**
 <!-- API-EVANGELIST-PROVENANCE:END -->
 
-Allo-Media, which now trades as **uh!ive**, is a French conversational-voice-AI company that
-transcribes and analyses telephone conversations in real time and in batch — speech-to-text tuned for
-8kHz telephony, named entity recognition and redaction, speech analytics, and call tracking.
+Allo-Media, which now trades as uh!ive, is a French conversational-voice-AI company that transcribes and analyses telephone conversations in real time and in batch. Its platform pairs speech-to-text tuned for 8kHz telephony with named entity recognition and redaction, speech analytics (intent, emotion and compliance tagging) and call tracking, hosted in France. Developers integrate through four surfaces: a read-only Activate REST API over processed calls and their transcripts, a WebSocket Stream API for live human-to-human conversations, an MRCP/WebSocket Stream API for voicebots, and a browser call-tracking script (Hermes), plus SFTP batch ingestion (JUpload) and an HMAC-signed webhook. Authentication is OAuth 2.0 client_credentials against a Keycloak realm; credentials are issued by an account manager rather than self-service.
 
-`www.allo-media.net` now 301s to `https://uh.live/en/`, and every runtime API host has moved to the
-`uh.live` domain, but the developer documentation still lives at
-[docs.allo-media.net](https://docs.allo-media.net/) under the old brand.
+**Areas:** Company · Ai Data · Speech Recognition · Speech-to-Text · Conversation Intelligence · Call Tracking · Voice AI · Natural Language Processing · Call Analytics · Contact Center · Speech Analytics · Transcription
 
-## API surface
+## Allo-Media on APIs.io
 
-| API | Base | Docs |
-|---|---|---|
-| Activate API (REST, read-only over processed calls) | `https://activate.uh.live` | [docs](https://docs.allo-media.net/activate-api/rest/) |
-| Stream API for humans (WebSocket, real-time transcription) | `wss://api.uh.live/socket/websocket` | [docs](https://docs.allo-media.net/stream-h2h/) |
-| Stream API for voicebots (MRCP / WebSocket) | `https://api.uh.live` | [docs](https://docs.allo-media.net/stream-h2b/) |
-| Hermes (browser call-tracking script) | `https://hermes.allo-media.net` | [docs](https://docs.allo-media.net/hermes/) |
+Everything profiled for Allo-Media is published on APIs.io rather than in this repository. Start at the provider page — **[apis.io/providers/allo-media/](https://apis.io/providers/allo-media/)** — or go straight to one of the APIs or properties below.
 
-Plus JUpload (SFTP batch ingestion) and an HMAC-SHA256-signed webhook. Authentication is OAuth 2.0
-`client_credentials` against a Keycloak realm; credentials come from an account manager, not
-self-service.
+### APIs (4)
 
-## What this profile found
+- [Allo-Media Activate API](https://apis.io/apis/allo-media/allo-media-activate-api/) — Read-only REST API over calls that have finished processing on the Allo-Media platform — transcription, redaction, analysis and tagging complete. Three…
+- [Allo-Media Stream API for Humans](https://apis.io/apis/allo-media/allo-media-stream-api-humans/) — Real-time transcription of live human-to-human conversations over a WebSocket (Phoenix Channels). A client joins a conversation, streams binary audio…
+- [Allo-Media Stream API for Voicebots](https://apis.io/apis/allo-media/allo-media-stream-api-voicebots/) — Real-time speech recognition for voicebots and IVR (human-to-bot), offered over either MRCP or WebSocket, with regex-based grammars constraining expected…
+- [Allo-Media Hermes Call Tracking](https://apis.io/apis/allo-media/allo-media-hermes/) — First-party browser JavaScript that performs dynamic number insertion so an inbound phone call can be attributed back to a web session — the mechanism…
 
-- **No OpenAPI, AsyncAPI, GraphQL, MCP server or A2A agent card.** `/.well-known/agent-card.json` and
-  `/.well-known/agent.json` return 404 on every host. The docs link a Swagger UI for the pre-v3 API at
-  `api.allo-media.net/swagger`, but that host refused every probe.
-- **The only machine-readable contract the company serves is its identity layer** — a full Keycloak
-  OIDC discovery document, captured verbatim in `well-known/`. It exposes a per-product scope model
-  (`activate`, `stream-h2h`, `stream-h2h-v2`, `stream-h2b`, `scribr`, and an undocumented
-  `voip-callapi`) that the developer documentation never mentions, plus mTLS-bound access tokens, DPoP
-  and dynamic client registration.
-- A valid RFC 9116 `security.txt`, a public dated product roadmap, a public status page, eight separate
-  release-note streams, and two official SDKs (`uhlive` on PyPI, `@uhlive/javascript-sdk` on npm).
-- No published pricing or plans; enterprise sales-led, with self-service API onboarding sitting on the
-  company's own public roadmap under "Later".
+### Published properties
 
-Source: portfolio company of [serena](https://github.com/api-evangelist/serena) — https://uh.live/en/
+Each property below is a page on APIs.io carrying the machine-readable artifact and what it says.
+
+#### AsyncAPI (1)
+
+Event-driven and webhook contracts.
+
+- [Allo Media Events](https://apis.io/asyncapis/allo-media/allo-media-events/)
+
+#### MCP servers (1)
+
+Model Context Protocol servers that expose the API to agents.
+
+- [allo-media-mcp.yml](https://apis.io/servers/allo-media/allo-media-mcp-yml/)
+
+#### Security (3)
+
+Authentication, trust centre, and vulnerability disclosure.
+
+- [Allo Media Authentication](https://apis.io/security/allo-media/allo-media-authentication/)
+- [Allo Media Domain Security](https://apis.io/security/allo-media/allo-media-domain-security/)
+- [Allo Media Vulnerability Disclosure](https://apis.io/security/allo-media/allo-media-vulnerability-disclosure/)
+
+#### OAuth scopes (1)
+
+The permissions the API asks for.
+
+- [Allo Media Scopes](https://apis.io/scopes/allo-media/allo-media-scopes/)
+
+#### Plans and pricing (1)
+
+Published plans, tiers and prices.
+
+- [Allo Media Plans Pricing](https://apis.io/plans/allo-media/allo-media-plans-pricing/)
+
+#### Rate limits (1)
+
+Published request limits.
+
+- [Allo Media Rate Limits](https://apis.io/rate-limits/allo-media/allo-media-rate-limits/)
+
+## Where to find this API
+
+Links to the company's own pages. This repository publishes no copy of their specifications — the canonical document is theirs and lives at the URLs below.
+
+- [Website](https://uh.live/en/)
+- [Documentation](https://docs.allo-media.net/)
+- [Getting started](https://docs.allo-media.net/activate-api/rest/getting-started/)
+- [API reference](https://docs.allo-media.net/activate-api/rest/)
+- [Support](https://uh.live/en/contact/)
+- [Blog](https://uh.live/en/articles/)
+- [Security](https://uh.live/.well-known/security.txt)
+- [Terms of service](https://uh.live/en/legal-notices/)
+- [GitHub](https://github.com/allo-media)
+- [Status](https://status.uh.live/)
+
+## API Evangelist rating
+
+**Kin Score 50.6** — developing · rubric 0.25.0 · scored 2026-10-23
+
+| Facet | Score |
+|---|---|
+| Discoverability | 89.3 |
+| Contract quality | 39.0 |
+| Contract governance | 18.2 |
+| Operational transparency | 92.1 |
+| Developer ergonomics | 64.3 |
+| Access clarity | 10.5 |
+
+**Agent readiness 37.8** — agent-ready
+
+| Agent-readiness dimension | Result |
+|---|---|
+| Spec Presence | yes |
+| Agentic Access | — |
+| Reversibility Documented | — |
+| MCP Server | — |
+| Auth Clarity | served (partial credit) |
+| Idempotency | — |
+| Error Semantics | documented (partial credit) |
+| OpenAPI Examples | — |
+| Rate Limit Signal | documented (partial credit) |
+| Event Surface Described | yes |
+| Agent Skills | — |
+| Well Known Catalog | — |
+| Consent Identity | — |
+| Agent Card | — |
+| Dry Run Mode | — |
+| Delegated Identity | served (partial credit) |
+| Protected Resource Metadata | — |
+| Dynamic Client Registration | yes |
+| Agentic Commerce | — |
+| Pagination Ratio | na |
+| Operation Distinctiveness | na |
+
+**Regulatory alignment 36.3** — AI & Biometrics
+
+The rubric is published at [github.com/api-evangelist/kin-score](https://github.com/api-evangelist/kin-score). The per-check breakdown behind these numbers — which checks were earned, partial or missed — along with score history and how this provider compares to its peers, is available at [apis.io/providers/allo-media/](https://apis.io/providers/allo-media/).
+
+## How this profile is made
+
+API Evangelist profiles a company's public API surface the way a developer would find it: the website, developer portal and documentation, the specifications it publishes, its public repositories, and its pricing, status and changelog pages. From that it derives the properties above — contracts split per API, workflows, schemas, collections, governance rules, plans and rate limits — and scores them against the published [Kin Score rubric](https://github.com/api-evangelist/kin-score).
+
+The artifacts are published on [APIs.io](https://apis.io), not in this repository. This repository is the public record for Allo-Media: the place to say something is wrong, missing or out of date, and to ask for a re-score or a removal.
+
+## Open an issue
+
+- **Something about this listing** — a wrong description, a missing API, a stale artifact or a question about the rating: [open an issue on this repository](https://github.com/api-evangelist/allo-media/issues/new).
+- **A new API, or one that is not in the catalog yet** — [submit it on APIs.io](https://apis.io/add/).
+- **Anything else** — [the APIs.io inbox](https://github.com/api-search/inbox/issues/new) or [info@apievangelist.com](mailto:info@apievangelist.com).
